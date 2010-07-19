@@ -10,6 +10,7 @@
 //!
 //==============================================================================
 
+
 #include "Button.h"
 #include <iostream>
 
@@ -135,7 +136,6 @@ void Button::glutPrint(float x, float y, void* font, string text, float r, float
 }  
 
 void Button::processMouse(int button, int state, int x, int y) {
-	// should have an event trigger on mouse exit (pressed=false, no action, request repaint)
 	if(state == GLUT_DOWN && !pressed) {
 		pressed = true;
 		bevel_size += 1;
@@ -166,16 +166,17 @@ void Button::onExit() {
 	}
 }
 
-string Button::getText() const {
-	return text;
-}
-
 void Button::setSizeAndPos(int x, int y, int width, int height) {
 	this->x      = x;
 	this->y      = y;
 	this->width  = width;
 	this->height = height;
 	MouseListener::setSize(x,y,width,height);
+}
+
+//! \brief Get the descriptive button text 
+string Button::getText() const {
+	return text;
 }
 
 /**

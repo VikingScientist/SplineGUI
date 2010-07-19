@@ -12,6 +12,11 @@ class MouseListener;
 class ActiveObject;
 class Button;
 
+/**
+ * \todo Is it possible to remove the use of the Workaround_namespace and replace this by
+ * static class-functions? Possible also private.
+ */
+
 namespace Workaround_namespace {
 
 	void addMouseListener(MouseListener *ml);
@@ -27,6 +32,10 @@ namespace Workaround_namespace {
 	void initRendering();
 }
 
+/** 
+ * \todo Implement a function to allow for command-line input (ideally we would like pop-up
+ * dialogs, but GLUT doesn't really make this easy).
+ */
 
 class Fenris {
 	private:

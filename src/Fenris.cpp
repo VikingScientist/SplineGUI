@@ -10,13 +10,6 @@
 //!
 //==============================================================================
 
-/**
- * \todo Is it possible to remove the use of the Workaround_namespace and replace this by
- * static class-functions? Possible also private.
- * 
- * \todo Implement a function to allow for command-line input (ideally we would like pop-up
- * dialogs, but GLUT doesn't really make this easy).
- */
 
 // standard c++ headers
 #include <iostream>
