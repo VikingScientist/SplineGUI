@@ -10,6 +10,7 @@
 
 class MouseListener;
 class ActiveObject;
+class Button;
 
 namespace Workaround_namespace {
 
@@ -32,14 +33,22 @@ class Fenris {
 		Fenris();
 		static Fenris *instance_;
 
+		int next_button_x;
+		int next_button_y;
+
 	public:
 
-		void setSize(int width, int height);
-		
+		// data management
 		void addFile(const char *filename);
 		void addObject(Go::SplineCurve *c);
 		void addObject(Go::SplineSurface *s);
 		void addObject(Go::SplineVolume *v);
+
+		// interaction management
+		void addButton(Button *b);
+
+		// window handling
+		void setSize(int width, int height);
 		void show();
 
 		/***************************************************//**

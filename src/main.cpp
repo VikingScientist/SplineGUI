@@ -8,6 +8,7 @@
  *************************************************************************************/
  
 #include "Fenris.h"
+#include "Button.h"
 #include <iostream>
 
 
@@ -22,3 +23,4 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
