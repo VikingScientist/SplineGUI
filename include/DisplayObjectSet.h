@@ -26,7 +26,6 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void setOnlySelectable(DISPLAY_CLASS_TYPE classType);
 		void changeControlMesh();
 		void changeParametric();
-		// DisplayObject* getSelected(DISPLAY_CLASS_TYPE classType);
 		vector<DisplayObject*> getSelectedObjects();
 		vector<DisplayObject*> getSelectedObjects(DISPLAY_CLASS_TYPE classType);
 

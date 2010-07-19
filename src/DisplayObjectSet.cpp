@@ -17,6 +17,11 @@ DisplayObjectSet::DisplayObjectSet() {
 	default_resolution[1] = 40;
 	default_resolution[2] = 40;
 }
+
+/**
+ * \todo Make sure that non-uniform tesselation resolution is possible by extensive
+ *       testing and more than likely followed by some bugfixing.
+ */
 void DisplayObjectSet::tesselateAll() {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->tesselate(default_resolution);

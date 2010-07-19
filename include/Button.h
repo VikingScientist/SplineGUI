@@ -9,6 +9,11 @@
 
 using namespace std;
 
+/**
+  * \todo Distinguish between the functions that the user needs access to and the functions
+  *       that the GUI engine needs access to.
+  */
+
 class Button : public MouseListener, ActiveObject {
 
 	public:
