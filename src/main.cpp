@@ -1,3 +1,12 @@
+/**********************************************************************************//**
+ * \file main.cpp
+ *
+ * \author Kjetil A. Johannessen
+ * \date July 2010
+ *
+ * \brief Program for displaying GoTools native file(s) through the simplest use of Fenris
+ *************************************************************************************/
+ 
 #include "Fenris.h"
 #include <iostream>
 

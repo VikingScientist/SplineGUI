@@ -1,5 +1,5 @@
 CC = g++
-PROG = bin/fenris
+PROG = bin/Fenris
 
 GOTLIB     = -L/usr/local/lib/GoTools -lGoToolsCore -lGoTrivariate
 GLLIB      = -lglut

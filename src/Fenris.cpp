@@ -395,19 +395,19 @@ void Fenris::addFile(const char *filename) {
 }
 
 //! \brief adds a single SplineCurve to be displayed
-void Fenris::addObject(SplineCurve *c) {
+void Fenris::addObject(Go::SplineCurve *c) {
 	CurveDisplay *obj = new CurveDisplay(c);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
 //! \brief adds a single SplineSurface to be displayed
-void Fenris::addObject(SplineSurface *s) {
+void Fenris::addObject(Go::SplineSurface *s) {
 	SurfaceDisplay *obj = new SurfaceDisplay(s);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
 //! \brief adds a single SplineVolume to be displayed
-void Fenris::addObject(SplineVolume *v) {
+void Fenris::addObject(Go::SplineVolume *v) {
 	VolumeDisplay *obj = new VolumeDisplay(v);
 	objectSet.addObject((DisplayObject*) obj);
 }
