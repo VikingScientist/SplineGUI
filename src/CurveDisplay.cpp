@@ -1,0 +1,206 @@
+
+#include "CurveDisplay.h"
+#include "CurvePoint.h"
+#include <GoTools/geometry/ObjectHeader.h>
+#include <algorithm>
+
+CurveDisplay::CurveDisplay(SplineCurve *curve) {
+	this->curve   = curve;
+	positions     = NULL;
+	param_values  = NULL;
+	xi_buffer     = NULL;
+	resolution    = 0;
+	selected      = false;
+}
+
+CurveDisplay::~CurveDisplay() {
+	if(positions)    delete[] positions;
+	if(param_values) delete[] param_values;
+	if(xi_buffer)    delete[] xi_buffer;
+	delete curve;
+}
+
+bool CurveDisplay::splitPeriodicCurveInFour(vector<CurvePoint*> splits, vector<SplineCurve*> &ret_val) {
+	if(splits.size() != 4)
+		return false;
+	ret_val.clear();
+	double param[4];
+	for(int i=0; i<4; i++)
+		param[i] = splits[i]->getParValue();
+	double start_u = param[0];
+	double tmp;
+	int split_i = 3; // the index where param[i%4]>param[(i+1)%4] i.e. contains the start/end-point of the curve
+
+	sort(param, param+4);
+	// if one of the splits is exactly at the start-/endpoint, then we use the GoTools-splitting
+	if(param[0] == 0.0) {
+		vector<double> splitting_params;
+		for(int i=1; i<4; i++)
+			splitting_params.push_back(curve->startparam() + param[i]*(curve->endparam() - curve->startparam()) );
+		vector<boost::shared_ptr<SplineCurve> > split_from_gotools = curve->split(splitting_params);
+		for(int i=0; i<4; i++) // make duplicate objects since shared_ptr objects are deleted on function return
+			ret_val.push_back( split_from_gotools[i]->clone() );
+		return true;
+	}
+	// make the parametric values to the true values instead of (0,1)
+	for(int i=0; i<4; i++) {
+		param[i] = curve->startparam() + param[i]*(curve->endparam() - curve->startparam());
+		curve->basis().knotIntervalFuzzy(param[i], 1e-3); // if splits are close to existing knots, we snap
+	}
+	start_u = curve->startparam() + start_u*(curve->endparam() - curve->startparam());
+	curve->basis().knotIntervalFuzzy(start_u, 1e-3); // if splits are close to existing knots, we snap
+
+	vector<double> knots, new_knots;
+	for(int i=0; i<4; i++)
+		for(int j=0; j<curve->order(); j++)
+			knots.push_back(param[i]);
+	// extract the knots to insert
+	set_difference(knots.begin(), knots.end(),
+	               curve->basis().begin(), curve->basis().end(),
+				   back_inserter(new_knots));
+
+	// insert new knots
+	curve->insertKnot(new_knots);
+
+	// make the splits cyclic sorted with the correct start (important to cycle after call to set_difference as this relies on sorted lists)
+	while(param[0] != start_u) {
+		tmp = param[0];
+		for(int i=0; i<3;i++)
+			param[i] = param[i+1];
+		param[3] = tmp;
+		split_i--;
+	}
+
+
+	// extract sub curves
+	int kk = curve->order();
+	int dd = curve->dimension();
+	vector<double>::iterator end   = curve->basis().end();
+	vector<double>::iterator start = curve->basis().begin();
+	SplineCurve* the_subCurve;
+	vector<double>::const_iterator coefs_start;
+	for(int i=0; i<4; i++) {
+		if(i == split_i) {
+			vector<double>::iterator knotstart  = find(start, end, param[i]);
+			vector<double>::iterator knotend    = find(start, end, param[(i+1)%4]);
+			int n = (end-knotstart-1) + (knotend-start);
+			vector<double>::iterator coefsstart = curve->coefs_begin() + dd*(         knotstart-start);
+			vector<double>::iterator coefsend   = curve->coefs_begin() + dd*( (n-kk)-(end-knotstart-kk-1)); //need (n-kk) coefs. (end-knotstart-kk-1) copied from the end
+
+			vector<double> subCurve_knots(n);
+			vector<double> subCurve_coefs((n-kk)*dd);
+			copy(knotstart, end-1, subCurve_knots.begin());
+			copy(coefsstart, curve->coefs_end()-dd, subCurve_coefs.begin());
+			vector<double>::iterator cur = start+kk;
+			for(int j=(end-knotstart-1); j<n; j++)
+				subCurve_knots[j] = (*cur++) + *(end-1)-*start;
+
+			copy(curve->coefs_begin(), coefsend, subCurve_coefs.begin() + dd*(end-knotstart-kk-1) );
+
+			the_subCurve = new SplineCurve(n-kk, kk, subCurve_knots.begin(), subCurve_coefs.begin(), dd);
+			ret_val.push_back(the_subCurve);
+			
+		} else {
+			vector<double>::iterator knotstart = find(start, end, param[i]);
+			vector<double>::iterator knotend = find(start, end, param[(i+1)%4]);
+			vector<double>::iterator coefsstart = curve->coefs_begin() + dd*(knotstart-start);
+			the_subCurve = new SplineCurve(knotend-knotstart, kk,
+			                               knotstart, coefsstart, dd);
+			ret_val.push_back(the_subCurve);
+		}
+	}
+	
+	return true;
+}
+
+void CurveDisplay::reTesselate() {
+	tesselate(&resolution);
+}
+
+void CurveDisplay::tesselate(int *n) {
+	if(positions)    delete[] positions;
+	if(param_values) delete[] param_values;
+
+	resolution = n[0];
+	positions = new double[n[0]*3];
+	param_values = new double[n[0]*3];
+	double p_min = curve->startparam();
+	double p_max = curve->endparam();
+	vector<Point> pts;
+	vector<double> param;
+	curve->uniformEvaluator(resolution, pts, param);
+	int k=0;
+	for(int i=0; i<resolution; i++) {
+		for(int d=0; d<pts[i].dimension(); d++) {
+			positions[k++] = pts[i][d];
+		}
+		param_values[i*3  ] = (param[i]-p_min)/(p_max-p_min);
+		param_values[i*3+1] = 0;
+		param_values[i*3+2] = 0;
+	}
+}
+
+void CurveDisplay::paint() {
+	glColor3f(0,0,0);
+	glLineWidth(2);
+	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+}
+
+void CurveDisplay::paintSelected() {
+	glColor3f(.9,.9,.9);
+	glLineWidth(2);
+	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+}
+
+void CurveDisplay::paintMouseAreas() {
+	glLineWidth(10);
+	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glColorPointer(3, GL_DOUBLE, 0, param_values);
+	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+}
+
+void CurveDisplay::readMouseAreas() {
+	if(xi_buffer) delete[] xi_buffer;
+	width = glutGet(GLUT_WINDOW_WIDTH);
+	height = glutGet(GLUT_WINDOW_HEIGHT);
+	xi_buffer = new GLfloat[width*height];
+	glReadPixels(0, 0, width, height, GL_RED, GL_FLOAT, xi_buffer);
+}
+
+bool CurveDisplay::isAtPosition(int x, int y) {
+	return (xi_buffer[y*width+x] > 0.0);
+}
+double CurveDisplay::parValueAtPosition(int x, int y) {
+	return xi_buffer[y*width+x];
+}
+
+
+void CurveDisplay::processMouse(int button, int state, int x, int y) {
+	
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && xi_buffer[y*width+x] > 0.0) {
+		selected = !selected;
+		fireActionEvent(CURVE_SELECTED);
+	}
+}
+
+void CurveDisplay::processMouseActiveMotion(int x, int y) {
+}
+
+void CurveDisplay::processMousePassiveMotion(int x, int y) {
+}
+
+void CurveDisplay::setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
+	this->actionPerformed = actionPerformed;
+}
+
+void CurveDisplay::printDebugInfo() {
+	cout << *curve;
+}
+
+void CurveDisplay::print(ostream *out) {
+	ObjectHeader head(Class_SplineCurve, 1, 0);
+	(*out) << head;
+	(*out) << *curve;
+}
