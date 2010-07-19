@@ -1,3 +1,23 @@
+//==============================================================================
+//!
+//! \file Fenris.cpp
+//!
+//! \date July 2010
+//!
+//! \author Kjetil A. Johannessen / SINTEF
+//!
+//! \brief Public and private access functions to the Fenris GUI class
+//!
+//==============================================================================
+
+/**
+ * \todo Is it possible to remove the use of the Workaround_namespace and replace this by
+ * static class-functions? Possible also private.
+ * 
+ * \todo Implement a function to allow for command-line input (ideally we would like pop-up
+ * dialogs, but GLUT doesn't really make this easy).
+ */
+
 // standard c++ headers
 #include <iostream>
 #include <stdlib.h>
@@ -12,7 +32,6 @@
 
 // Fenris headers
 #include "Camera.h"
-#include "Colorbar.h"
 #include "DisplayObject.h"
 #include "DisplayObjectSet.h"
 #include "CurvePoint.h"
@@ -44,12 +63,6 @@ OrthoProjection top_view(TOP);
 OrthoProjection front_view(FRONT);
 OrthoProjection left_view(LEFT);
 vector<MVPHandler*> view_panels;
-
-// Button coons("Coons",          10,  20, 100, 30);
-// Button loft("Loft Solid",     120,  20, 100, 30);
-// Button debug("Debug info",    230,  20, 100, 30);
-// Button save("Save selected",  340,  20, 100, 30);
-// Button param("ParameterView", 450,  20, 100, 30);
 
 DisplayObjectSet objectSet;
 vector<MouseListener*> mouse_listeners;
@@ -324,6 +337,11 @@ void *start(void *arg) {
 
 
 Fenris::Fenris() {
+	// initalize Fenris private attributes
+	next_button_x = 10;
+	next_button_y = 20;
+
+	// initalize GLUT
 	int argc = 0;
 	glutInit(&argc, NULL);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -353,43 +371,31 @@ Fenris::Fenris() {
 	addMouseListener(&objectSet);
 	((ActiveObject*) &objectSet)->setActionListener(actionListener);
 
-	// setup button interaction
-	/*
-	buttons.push_back(&coons);
-	buttons.push_back(&loft);
-	buttons.push_back(&debug);
-	buttons.push_back(&save);
-	buttons.push_back(&param);
-	*/
-	for(uint i=0; i<buttons.size(); i++) {
-		addMouseListener((MouseListener*)buttons[i]);
-		((ActiveObject*) buttons[i])->setActionListener(actionListener);
-	}
 }
 
-/***************************************************//**
+/**************************************************************//**
  \brief Displays the GUI and halts program execution
 
  see the description on getInstance()
- ******************************************************/
+ *****************************************************************/
 void Fenris::show() {
 	glutMainLoop();
 }
 
-/***************************************************//**
+/**************************************************************//**
  \brief Sets the window size 
  \param width Width in pixels
  \param height Height in pixels
- ******************************************************/
+ *****************************************************************/
 void Fenris::setSize(int width, int height) {
 	window_width  = width;
 	window_height = height;
 }
 
-/***************************************************//**
+/**************************************************************//**
  \brief Adds .g2-file to display
  \param filename name of .g2-file to be read and added to the display list
- ******************************************************/
+ *****************************************************************/
 void Fenris::addFile(const char *filename) {
 	readFile(filename);
 }
@@ -432,5 +438,19 @@ vector<SplineSurface*> getSelectedSurfaces() {
 		results.push_back(s);
 	}
 	return results;
+}
+
+void Fenris::addButton(Button *b) {
+	string text = b->getText();
+	int width   = text.length() * 6 + 20;
+	int height  = 30;
+	int x       = next_button_x;
+	int y       = next_button_y;
+
+	next_button_x += width + 10;
+	b->setSizeAndPos(x, y, width, height);
+	addMouseListener((MouseListener*)b);
+	((ActiveObject*) b)->setActionListener(actionListener);
+	buttons.push_back(b);
 }
 

@@ -30,7 +30,7 @@ class MouseListener {
 		virtual void processMouseActiveMotion(int x, int y) { }
 		virtual void processMousePassiveMotion(int x, int y) { }
 		virtual void onEnter() { hover = true;}
-		virtual void onExit() { hover = false;}
+		virtual void onExit()  { hover = false;}
 		void setSize(int x, int y, int width, int height) {
 			this->x      = x;
 			this->y      = y;

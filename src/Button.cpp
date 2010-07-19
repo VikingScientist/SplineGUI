@@ -1,18 +1,44 @@
+//==============================================================================
+//!
+//! \file Button.cpp
+//!
+//! \date July 2010
+//!
+//! \author Kjetil A. Johannessen / SINTEF
+//!
+//! \brief Button primitive for GUI control
+//!
+//==============================================================================
 
 #include "Button.h"
 #include <iostream>
 
-Button::Button(string text, int x, int y, int width, int height) : MouseListener(x,y,width,height) {
-	this->x = x;
-	this->y = y;
-	this->width = width;
-	this->height = height;
+Button::Button(string text) : MouseListener(0,0,0,0) {
+	this->x      = 0;
+	this->y      = 0;
+	this->width  = 0;
+	this->height = 0;
 	this->text = text;
 	r = 0.6;
 	g = 0.6;
 	b = 0.6;
 	bevel_size = 4; // given in pixels
 	pressed = false;
+	onClick = NULL;
+}
+
+Button::Button(string text, int x, int y, int width, int height) : MouseListener(x,y,width,height) {
+	this->x      = x;
+	this->y      = y;
+	this->width  = width;
+	this->height = height;
+	this->text   = text;
+	r = 0.6;
+	g = 0.6;
+	b = 0.6;
+	bevel_size = 4; // given in pixels
+	pressed = false;
+	onClick = NULL;
 }
 
 void Button::paint() {
@@ -118,6 +144,8 @@ void Button::processMouse(int button, int state, int x, int y) {
 		pressed = false;
 		bevel_size -= 1;
 		fireActionEvent(ACTION_BUTTON_PRESSED | ACTION_REQUEST_REPAINT);
+		if(onClick != NULL)
+			onClick(this);
 	}
 }
 void Button::processMouseActiveMotion(int x, int y) {
@@ -136,4 +164,28 @@ void Button::onExit() {
 		pressed = false;
 		fireActionEvent(ACTION_REQUEST_REPAINT);
 	}
+}
+
+string Button::getText() const {
+	return text;
+}
+
+void Button::setSizeAndPos(int x, int y, int width, int height) {
+	this->x      = x;
+	this->y      = y;
+	this->width  = width;
+	this->height = height;
+	MouseListener::setSize(x,y,width,height);
+}
+
+/**
+ * \brief Sets the function which is to be called in the case of the button being clicked
+ * \param onClick pointer to the function which is to be executed
+ * 
+ * This is the primary interaction point for the Fenris program. It is possible to distinguish
+ * between different buttons by testing on the caller (which is passed as the Button* argument)
+ * if one where to use the same function for different buttons.
+ */
+void Button::setOnClick(void (*onClick)(Button*)) {
+	this->onClick = onClick;
 }
