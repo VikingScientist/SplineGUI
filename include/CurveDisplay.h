@@ -3,6 +3,7 @@
 #define _CURVE_DISPLAY_H
 
 #include "DisplayObject.h"
+#include "PointDisplay.h"
 #include <GoTools/geometry/SplineCurve.h>
 #include "ActiveObject.h"
 #include <GL/glut.h>
@@ -20,7 +21,7 @@ class CurveDisplay : public DisplayObject, ActiveObject {
 		SplineCurve *curve;
 
 		// CurveDisplay(boost::shared_ptr<SplineCurve> curve);
-		CurveDisplay(SplineCurve *curve);
+		CurveDisplay(SplineCurve *curve, bool clean=false);
 		~CurveDisplay();
 		void reTesselate();
 		void tesselate(int *n);
@@ -49,6 +50,8 @@ class CurveDisplay : public DisplayObject, ActiveObject {
 		double *param_values;
 		GLfloat *xi_buffer;
 		bool selected;
+		PointDisplay *start_p;
+		PointDisplay *stop_p;
 };
 
 #endif

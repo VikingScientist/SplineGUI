@@ -4,13 +4,23 @@
 #include <GoTools/geometry/ObjectHeader.h>
 #include <algorithm>
 
-CurveDisplay::CurveDisplay(SplineCurve *curve) {
+CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	this->curve   = curve;
 	positions     = NULL;
 	param_values  = NULL;
 	xi_buffer     = NULL;
 	resolution    = 0;
 	selected      = false;
+	if(!clean) {
+		Point p ;
+		curve->point(p, curve->startparam() );
+		start_p = new PointDisplay(p);
+		curve->point(p, curve->endparam() );
+		stop_p  = new PointDisplay(p);
+	} else {
+		start_p = NULL;
+		stop_p  = NULL;
+	}
 }
 
 CurveDisplay::~CurveDisplay() {
@@ -138,6 +148,8 @@ void CurveDisplay::tesselate(int *n) {
 		param_values[i*3+1] = 0;
 		param_values[i*3+2] = 0;
 	}
+	if(start_p) start_p->tesselate(&resolution);
+	if(stop_p) stop_p->tesselate(&resolution);
 }
 
 void CurveDisplay::paint() {
@@ -145,6 +157,8 @@ void CurveDisplay::paint() {
 	glLineWidth(2);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+	if(start_p) start_p->paint();
+	if(stop_p) stop_p->paint();
 }
 
 void CurveDisplay::paintSelected() {

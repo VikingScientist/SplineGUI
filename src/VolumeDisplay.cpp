@@ -21,8 +21,8 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	for(int i=0; i<6; i++) {
 		walls.push_back( new SurfaceDisplay(edges[i]->clone()) );
 		walls[i]->setFaceIndex(i);
+		walls[i]->setOrigin(this);
 	}
-
 }
 
 VolumeDisplay::~VolumeDisplay() {
@@ -175,7 +175,6 @@ SurfaceDisplay* VolumeDisplay::getSurfaceAt(int x, int y) {
 
 
 void VolumeDisplay::processMouse(int button, int state, int x, int y) {
-	
 	/*
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && xi_buffer[y*width+x] > 0.0) {
 		selected = !selected;

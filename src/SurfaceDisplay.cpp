@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SurfaceDisplay::SurfaceDisplay(SplineSurface *surf) {
+SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
 	this->surf = surf;
 	positions      = NULL;
 	normals        = NULL;
@@ -26,10 +26,18 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf) {
 	vector<boost::shared_ptr<SplineCurve> > const_crvs2;
 	surf->getConstParamCurves(knotval1, knotval2, const_crvs1, const_crvs2); 
 
-	for(uint i=0; i<const_crvs1.size(); i++)
-		knot_lines.push_back(new CurveDisplay(const_crvs1[i]->clone()) );
-	for(uint i=0; i<const_crvs2.size(); i++)
-		knot_lines.push_back(new CurveDisplay(const_crvs2[i]->clone()) );
+	if(!clean) {
+		for(uint i=0; i<const_crvs1.size(); i++) {
+			CurveDisplay *c = new CurveDisplay(const_crvs1[i]->clone(), true);
+			c->setOrigin(this);
+			knot_lines.push_back(c);
+		}
+		for(uint i=0; i<const_crvs2.size(); i++) {
+			CurveDisplay *c = new CurveDisplay(const_crvs2[i]->clone(), true);
+			c->setOrigin(this);
+			knot_lines.push_back(c);
+		}
+	}
 }
 
 SurfaceDisplay::~SurfaceDisplay() {

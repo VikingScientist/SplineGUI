@@ -9,6 +9,7 @@ CFLAGS = -Wall -g
 SRCS = src/main.cpp \
        src/Camera.cpp \
        src/OrthoProjection.cpp \
+	   src/PointDisplay.cpp \
 	   src/CurveDisplay.cpp \
 	   src/SurfaceDisplay.cpp \
 	   src/VolumeDisplay.cpp \
