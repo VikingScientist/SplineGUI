@@ -33,6 +33,15 @@ Workaround_namespace. It should not under any circumstances be necessary to use 
 functions or variables declared in this namespace. All interactions with the GUI should go
 through the Fenris class. See main.cpp for the simplest way of initializing the GUI. 
 
+The controls of the GUI are as follows
+- space                     :  maximize the current viewport
+- c                         :  display the control mesh
+- q                         :  quit program
+- Right mousebutton         : rotate
+- Right mousebutton + ctrl  : zoom
+- Right mousebutton + shift : pan
+
+
 \section requirements Library requirements
 
 The project relies on the use of openGL, and specifically the openGL Utility Toolkit

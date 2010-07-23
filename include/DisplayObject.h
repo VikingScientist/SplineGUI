@@ -9,6 +9,7 @@ using namespace std;
 enum DISPLAY_CLASS_TYPE {
 	NONE,
 	ALL,
+	POINT,
 	CURVE_POINT,
 	CURVE,
 	SURFACE,
@@ -20,9 +21,13 @@ class DisplayObject : public MouseListener {
 
 	private:
 		bool selected;
+		DisplayObject *origin;
 
 	public:
-		DisplayObject()  { selected = false; }
+		DisplayObject() {
+			selected = false;
+			origin   = NULL;
+		}
 		~DisplayObject() { }
 		// all below methods SHOULD be overwritten in all implementing classes (java interface-like)
 		virtual void tesselate(int *n) { }
@@ -40,6 +45,12 @@ class DisplayObject : public MouseListener {
 		virtual void setDrawControlMesh(bool draw) { }
 
 		// no need to overwrite these
+		DisplayObject* getOrigin() {
+			return origin;
+		}
+		void setOrigin(DisplayObject *o) {
+			origin = o;
+		}
 		void setSelected(bool selected) {
 			this->selected = selected;
 		}

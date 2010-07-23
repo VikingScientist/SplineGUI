@@ -9,7 +9,7 @@ CurvePoint::CurvePoint(CurveDisplay *curve, double u) {
 	this->curve = curve;
 	this->u = u;
 	xi_buffer = NULL;
-	start = false;
+	directionalPoint = false;
 }
 
 CurvePoint::~CurvePoint() {
@@ -35,7 +35,7 @@ void CurvePoint::tesselate(int *n) {
 }
 
 void CurvePoint::paint() {
-	if(start)
+	if(directionalPoint)
 		glColor3f(.2,.4,.2);
 	else
 		glColor3f(.2,.2,.2);
@@ -43,7 +43,7 @@ void CurvePoint::paint() {
 	glBegin(GL_POINTS);
 		glVertex3f(pos[0], pos[1], pos[2]);
 	glEnd();
-	if(start)
+	if(directionalPoint)
 		paintDirectionArrow();
 }
 
@@ -53,7 +53,7 @@ void CurvePoint::paintSelected() {
 	glBegin(GL_POINTS);
 		glVertex3f(pos[0], pos[1], pos[2]);
 	glEnd();
-	if(start)
+	if(directionalPoint)
 		paintDirectionArrow();
 }
 
@@ -63,7 +63,7 @@ void CurvePoint::paintMouseAreas() {
 	glBegin(GL_POINTS);
 		glVertex3f(pos[0], pos[1], pos[2]);
 	glEnd();
-	if(start)
+	if(directionalPoint)
 		paintDirectionArrow();
 }
 
@@ -109,8 +109,8 @@ void CurvePoint::processMouseActiveMotion(int x, int y) {
 void CurvePoint::processMousePassiveMotion(int x, int y) {
 }
 
-void CurvePoint::setToStart() {
-	start = true;
+void CurvePoint::makeDirectionalPoint() {
+	directionalPoint = true;
 }
 
 void CurvePoint::setParValue(double u) {

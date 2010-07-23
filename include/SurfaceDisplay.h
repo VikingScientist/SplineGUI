@@ -17,7 +17,7 @@ class SurfaceDisplay : public DisplayObject, ActiveObject {
 	public:
 		SplineSurface *surf;
 
-		SurfaceDisplay(SplineSurface *surf);
+		SurfaceDisplay(SplineSurface *surf, bool clean=false) ;
 		~SurfaceDisplay();
 		void setFaceIndex(int i);
 		void tesselate(int *n);
