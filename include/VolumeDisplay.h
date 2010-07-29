@@ -4,7 +4,6 @@
 
 #include "DisplayObject.h"
 #include <GoTools/trivariate/SplineVolume.h>
-#include "ActiveObject.h"
 #include <GL/glut.h>
 #include <vector>
 class CurveDisplay;
@@ -13,7 +12,7 @@ class SurfaceDisplay;
 using namespace std;
 using namespace Go;
 
-class VolumeDisplay : public DisplayObject, ActiveObject {
+class VolumeDisplay : public DisplayObject {
 	
 	public:
 		SplineVolume *volume;
@@ -34,7 +33,12 @@ class VolumeDisplay : public DisplayObject, ActiveObject {
 		void printDebugInfo();
 		void print(ostream *out);
 		void setDrawControlMesh(bool draw);
-			
+		void setSelectedColor(double r, double g, double b);
+		void setColor(double r, double g, double b);
+
+		void initMouseMasks() ;
+		void setMaskPos(int x, int y, bool value) ;
+		void paintMouseAreas(float r, float g, float b) ;
 	
 	private:
 

@@ -16,6 +16,7 @@ DisplayObjectSet::DisplayObjectSet() {
 	default_resolution[0] = 40;
 	default_resolution[1] = 40;
 	default_resolution[2] = 40;
+	wallbuffer            = NULL;
 }
 
 /**
@@ -25,32 +26,35 @@ DisplayObjectSet::DisplayObjectSet() {
 void DisplayObjectSet::tesselateAll() {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->tesselate(default_resolution);
-	/*
-	for(vector<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
-		(*obj)->tesselate(default_resolution);
-	*/
 }
 void DisplayObjectSet::tesselateAll(int *n) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->tesselate(n);
-	/*
-	for(vector<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
-		(*obj)->tesselate(n);
-	*/
 }
 
+void DisplayObjectSet::setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
+	this->actionPerformed = actionPerformed;
+	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
+		(*obj)->setActionListener(actionPerformed);
+}
+
+/*! \todo Figure out why paintAll is called 4 times on startup and on each mousebutton-press */
 void DisplayObjectSet::paintAll() {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		if( !(*obj)->isSelected() )
 			(*obj)->paint();
-	for(vector<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
+	for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
 		(*obj)->paintSelected();
 }
 
 void DisplayObjectSet::paintAllMouseAreas(vector<MVPHandler*> viewpanels) {
 	glClearColor(0,0,0,0);
-	int window_width  = glutGet(GLUT_WINDOW_WIDTH);
-	int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+	int width  = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+#if 0  
+# ===== THIS IS THE OLD READPIXEL-WAY FOR EVERY OBJECT - TOO SLOW!!!! ======
+	
 	glEnable(GL_DEPTH_TEST);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -84,71 +88,137 @@ void DisplayObjectSet::paintAllMouseAreas(vector<MVPHandler*> viewpanels) {
 	}
 	glDisableClientState(GL_COLOR_ARRAY);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	/*
-	for(vector<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
-		(*obj)->paintMouseAreas();
-	*/
+#endif
+
+/*
+	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
+		(*obj)->initMouseMasks();
+*/
+
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnable(GL_DEPTH_TEST);
+	for(uint i=0; i<viewpanels.size(); i++) {
+		viewpanels[i]->setScissortest();
+		viewpanels[i]->setViewport();
+		viewpanels[i]->setProjection();
+		viewpanels[i]->setModelView();
+		float r, g, b;
+		int n = objects.size();
+		int obj_i = 1;
+		if(n > 32*32*32) {
+			cerr << "Too many objects in the scene - rewrite MouseMask-code\n";
+			exit(1);
+		}
+		for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj) {
+			r =  (obj_i%32)     / 32.;
+			g = ((obj_i/32)%32) / 32.;
+			b =  (obj_i/32/32)  / 32.;
+			(*obj)->paintMouseAreas(r, g, b);
+			obj_i++;
+		}
+	}
+	glDisable(GL_SCISSOR_TEST);
+	if(wallbuffer) delete[] wallbuffer;
+	wallbuffer = new GLfloat[3*width*height];
+	glReadPixels(0, 0, width, height, GL_RGB,  GL_FLOAT, wallbuffer);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+}
+
+int DisplayObjectSet::objectAtPosition(int x, int y) {
+	int width  = glutGet(GLUT_WINDOW_WIDTH);
+	int k = (width*y+x)*3;
+	int i;
+	GLfloat r,g,b;
+	r = wallbuffer[k++];
+	g = wallbuffer[k++];
+	b = wallbuffer[k++];
+	i = floor(b*32+.5)*32*32 +
+	    floor(g*32+.5)*32 +
+		floor(r*32+.5);
+	return i-1;
 }
 
 void DisplayObjectSet::addObject(DisplayObject* obj) {
 	objects.push_back((DisplayObject*) obj);
 	obj->tesselate(default_resolution);
+	if(actionPerformed) obj->setActionListener(actionPerformed);
 	hasNewObjects = true;
-	// fireActionEvent(GEOMETRY_MOVE_STOPPED);
 }
 
 bool DisplayObjectSet::removeObject(DisplayObject* del_obj) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
 		if(del_obj == *obj) {
 			objects.erase(obj);
-			for(vector<DisplayObject*>::iterator sel=selected.begin(); sel < selected.end(); ++sel)
-				if(del_obj == *sel)
+			for(set<DisplayObject*>::iterator sel=selected.begin(); sel != selected.end(); ++sel) {
+				if(del_obj == *sel) {
 					selected.erase(sel);
+					break;
+				}
+			}
 			return true;
 		}
 	}
 
-/*
-	for(vector<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj) {
+	for(vector<DisplayObject*>::iterator obj=hidden.begin(); obj != hidden.end(); ++obj) {
 		if(del_obj == *obj) {
-			selected.erase(obj);
+			hidden.erase(obj);
 			return true;
 		}
 	}
-*/
 	return false;
 }
 
 void DisplayObjectSet::removeSelected() {
-	for(uint i=0; i<selected.size(); i++)
-		selected[i]->setSelected(false);
+	for(set<DisplayObject*>::iterator sel=selected.begin(); sel != selected.end(); ++sel)
+		(*sel)->setSelected(false);
 	selected.clear();
+}
+
+void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
+	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
+		if((*obj)->classType() == type || type==ALL) {
+			hidden.push_back(*obj);
+			objects.erase(obj);
+			obj--;
+		}
+	}
+	bool anything_erased ;
+	do {
+		anything_erased = false;
+		for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj) {
+			if((*obj)->classType() == type || type==ALL) {
+				(*obj)->setSelected(false);
+				selected.erase(obj);
+				anything_erased = true;
+				break;
+			}
+		}
+	} while(anything_erased);
+	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
+}
+
+void DisplayObjectSet::unHideObjects(DISPLAY_CLASS_TYPE type) {
+	for(vector<DisplayObject*>::iterator obj=hidden.begin(); obj < hidden.end(); ++obj) {
+		if((*obj)->classType() == type || type==ALL) {
+			objects.push_back(*obj);
+			hidden.erase(obj);
+			obj--;
+		}
+	}
+	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
 }
 
 void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 	if(control_mesh) return;
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		left_mouse_held = true;
-		// if ctrl is not pressed. Move every (previously marked selected
-		// object back into the "objects" vector to empty selection
 		if(! (glutGetModifiers() & GLUT_ACTIVE_CTRL) ) {
-			for(uint i=selected.size(); i-->0; ) {
-				if(classType == ALL || selected[i]->classType() == classType) {
-					selected[i]->setSelected(false);
-					selected.erase(selected.begin()+i);
-				}
-			}
+			for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
+				(*obj)->setSelected(false);
+			selected.clear();
 		}
 		/*
-			for(vector<DisplayObject*>::size_type i=selected.size(); i-->0; )  {
-				DisplayObject *obj = selected[i];
-				if(classType == ALL || obj->classType() == classType) {
-					objects.push_back(obj);
-					selected.erase(selected.begin()+i);
-				}
-			}
-		}
-		*/
 		for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj) {
 			if( (glutGetModifiers()       &  GLUT_ACTIVE_SHIFT) &&
 			    (*obj)->classType()       == VOLUME             &&
@@ -162,29 +232,12 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 				(*obj)->setSelected(true);
 			}
 		}
-
-		/*
-		vector<int> newly_selected;
-		for(vector<DisplayObject*>::size_type i=0; i<objects.size(); i++) {
-			if( glutGetModifiers()            == GLUT_ACTIVE_SHIFT &&
-			    objects[i]->classType()       == VOLUME            &&
-			    objects[i]->isAtPosition(x,y)                      &&
-				(classType==ALL               || classType==SURFACE) ) {
-				selected.push_back( (DisplayObject*) ((VolumeDisplay*)objects[i])->getSurfaceAt(x,y) );
-			} else if(objects[i]->isAtPosition(x,y) && (classType==ALL || classType==objects[i]->classType())) {
-				newly_selected.push_back(i);
-			}
-		}
-
-		// newly_selected is sorted... since we are erasing things from
-		// the vector "objects", we need to iterate in reverse direction
-		// to not destroy the indices
-		for(vector<int>::reverse_iterator i=newly_selected.rbegin(); i!=newly_selected.rend(); i++) {
-			selected.push_back(objects[*i]);
-			vector<DisplayObject*>::iterator delete_pos = objects.begin() + *i;
-			objects.erase(delete_pos);
-		}
 		*/
+		int obj_i = objectAtPosition(x,y);
+		if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
+			selected.insert(objects[obj_i]);
+		}
+
 		fireActionEvent(ACTION_REQUEST_REPAINT);
 	} else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
 		left_mouse_held = false;
@@ -195,9 +248,9 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 void DisplayObjectSet::processMouseActiveMotion(int x, int y) {
 	if(!left_mouse_held)
 		return;
-	for(vector<DisplayObject*>::size_type i=0; i<selected.size(); i++)
-		if((selected[i]->classType()==classType || classType==ALL) )
-			selected[i]->processMouseActiveMotion(x,y);
+	for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
+		if(((*obj)->classType()==classType || classType==ALL) )
+			(*obj)->processMouseActiveMotion(x,y);
 }
 
 void DisplayObjectSet::processMousePassiveMotion(int x, int y) {
@@ -208,14 +261,14 @@ void DisplayObjectSet::setOnlySelectable(DISPLAY_CLASS_TYPE classType) {
 }
 
 vector<DisplayObject*> DisplayObjectSet::getSelectedObjects() {
-	return selected;
+	return getSelectedObjects(ALL);
 }
 
 vector<DisplayObject*> DisplayObjectSet::getSelectedObjects(DISPLAY_CLASS_TYPE classType) {
 	vector<DisplayObject*> results;
-	for(vector<DisplayObject*>::size_type i=0; i<selected.size(); i++)
-		if((selected[i]->classType()==classType || classType==ALL) )
-			results.push_back(selected[i]);
+	for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
+		if(((*obj)->classType()==classType || classType==ALL) )
+			results.push_back(*obj);
 	
 	return results;
 }
@@ -236,4 +289,11 @@ void DisplayObjectSet::changeControlMesh() {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->setDrawControlMesh(!control_mesh);
 	control_mesh = !control_mesh;
+}
+
+vector<DisplayObject*>::iterator DisplayObjectSet::objects_begin() {
+	return objects.begin();
+}
+vector<DisplayObject*>::iterator DisplayObjectSet::objects_end() {
+	return objects.end();
 }

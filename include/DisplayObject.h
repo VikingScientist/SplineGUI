@@ -2,6 +2,7 @@
 #define _DISPLAY_OBJECT_H
 
 #include "MouseListener.h"
+#include "ActiveObject.h"
 #include <iostream>
 
 using namespace std;
@@ -17,15 +18,21 @@ enum DISPLAY_CLASS_TYPE {
 };
 	
 
-class DisplayObject : public MouseListener {
+class DisplayObject : public MouseListener, ActiveObject {
 
 	private:
 		bool selected;
+		bool selected_color_specified;
 		DisplayObject *origin;
+
+	protected:
+		double color[3];
+		double selected_color[3];
 
 	public:
 		DisplayObject() {
 			selected = false;
+			selected_color_specified = false;
 			origin   = NULL;
 		}
 		~DisplayObject() { }
@@ -43,6 +50,12 @@ class DisplayObject : public MouseListener {
 		virtual void printDebugInfo() { }
 		virtual void print(ostream *out) { }
 		virtual void setDrawControlMesh(bool draw) { }
+		virtual void setActionListener(void (*actionPerformed)(ActiveObject*, int )) { ActiveObject::setActionListener(actionPerformed); }
+
+		// trying diffent things with the mouse-masks
+		virtual void initMouseMasks() { }
+		virtual void setMaskPos(int x, int y, bool value) { }
+		virtual void paintMouseAreas(float r, float g, float b) { }
 
 		// no need to overwrite these
 		DisplayObject* getOrigin() {
@@ -56,6 +69,22 @@ class DisplayObject : public MouseListener {
 		}
 		bool isSelected() {
 			return selected;
+		}
+		virtual void setSelectedColor(double r, double g, double b) {
+			selected_color[0] = r;
+			selected_color[1] = g;
+			selected_color[2] = b;
+			selected_color_specified = true;
+			fireActionEvent(ACTION_REQUEST_REPAINT);
+		}
+		virtual void setColor(double r, double g, double b) {
+			color[0] = r;
+			color[1] = g;
+			color[2] = b;
+			if(!selected_color_specified)
+				for(int i=0; i<3; i++)
+					selected_color[i] = (color[i]+.2 > 1) ? 1 : color[i]+.5;
+			fireActionEvent(ACTION_REQUEST_REPAINT);
 		}
 
 };

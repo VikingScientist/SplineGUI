@@ -1,12 +1,13 @@
 
 #include "PointDisplay.h"
-#include "CurveDisplay.h"
 #include <GL/glu.h>
 #include <cmath>
 
 PointDisplay::PointDisplay(Point p) {
 	this->point = p;
 	bool_buffer = NULL;
+	setColor(.1,.1,.1);
+	setSelectedColor(.9,.9,.9);
 }
 
 PointDisplay::~PointDisplay() {
@@ -17,7 +18,7 @@ void PointDisplay::tesselate(int *n) {
 }
 
 void PointDisplay::paint() {
-	glColor3f(.2,.2,.2);
+	glColor3f(color[0], color[1], color[2]);
 	glPointSize(10);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
@@ -25,7 +26,7 @@ void PointDisplay::paint() {
 }
 
 void PointDisplay::paintSelected() {
-	glColor3f(.9,.9,.9);
+	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glPointSize(10);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
@@ -67,3 +68,26 @@ void PointDisplay::printDebugInfo() {
 
 void PointDisplay::print(ostream *out) {
 }
+
+void PointDisplay::initMouseMasks() {
+	if(bool_buffer) delete[] bool_buffer;
+	width  = glutGet(GLUT_WINDOW_WIDTH);
+	height = glutGet(GLUT_WINDOW_HEIGHT);
+	bool_buffer = new GLfloat[width*height];
+	// for(int i=0; i<width*height; i++)
+		// bool_buffer[i] = 0.0;
+}
+
+void PointDisplay::setMaskPos(int x, int y, bool value) {
+	bool_buffer[y*width+x] = (value) ? 1.0 : 0.0;
+}
+
+void PointDisplay::paintMouseAreas(float r, float g, float b) {
+	glColor3f(r,g,b);
+	glPointSize(16);
+	glBegin(GL_POINTS);
+		glVertex3f(point[0], point[1], point[2]);
+	glEnd();
+}
+
+

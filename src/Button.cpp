@@ -25,6 +25,7 @@ Button::Button(string text) : MouseListener(0,0,0,0) {
 	b = 0.6;
 	bevel_size = 4; // given in pixels
 	pressed = false;
+	isOnOffButton = false;
 	onClick = NULL;
 }
 
@@ -136,18 +137,28 @@ void Button::glutPrint(float x, float y, void* font, string text, float r, float
 }  
 
 void Button::processMouse(int button, int state, int x, int y) {
+	if(button != GLUT_LEFT_BUTTON) return;
 	if(state == GLUT_DOWN && !pressed) {
 		pressed = true;
 		bevel_size += 1;
+		if(isOnOffButton && onClick != NULL)
+			onClick(this);
 		fireActionEvent(ACTION_REQUEST_REPAINT);
-	} else if(state == GLUT_UP && pressed) {
+	} else if(state == GLUT_UP && pressed && !isOnOffButton) {
 		pressed = false;
 		bevel_size -= 1;
 		fireActionEvent(ACTION_BUTTON_PRESSED | ACTION_REQUEST_REPAINT);
 		if(onClick != NULL)
 			onClick(this);
+	} else if(state == GLUT_DOWN && pressed && isOnOffButton) {
+		pressed = false;
+		bevel_size -= 1;
+		fireActionEvent(ACTION_REQUEST_REPAINT);
+		if(onClick != NULL)
+			onClick(this);
 	}
 }
+
 void Button::processMouseActiveMotion(int x, int y) {
 
 }
@@ -159,7 +170,7 @@ void Button::onEnter() {
 }
 void Button::onExit() {
 	MouseListener::onExit();
-	if(pressed) {
+	if(pressed && !isOnOffButton) {
 		bevel_size -= 1;
 		pressed = false;
 		fireActionEvent(ACTION_REQUEST_REPAINT);
@@ -172,6 +183,28 @@ void Button::setSizeAndPos(int x, int y, int width, int height) {
 	this->width  = width;
 	this->height = height;
 	MouseListener::setSize(x,y,width,height);
+}
+
+void Button::makeOnOffButton() {
+	isOnOffButton = true;
+}
+
+void Button::setSelected(bool on) {
+	if(!isOnOffButton) return;
+	if(on != pressed) {
+		if(pressed)
+			bevel_size -= 1;
+		else
+			bevel_size += 1;
+		pressed = on;
+		fireActionEvent(ACTION_REQUEST_REPAINT);
+		if(onClick != NULL)
+			onClick(this);
+	}
+}
+
+bool Button::isSelected() const {
+	return pressed;
 }
 
 //! \brief Get the descriptive button text 

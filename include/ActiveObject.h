@@ -20,7 +20,7 @@ class ActiveObject {
 		}
 	public:
 		ActiveObject() { actionPerformed = NULL; }
-		void setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
+		virtual void setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
 			this->actionPerformed = actionPerformed;
 		}
 };

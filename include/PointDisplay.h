@@ -4,11 +4,10 @@
 #include <GoTools/utils/Point.h>
 #include <GL/glut.h>
 #include "DisplayObject.h"
-#include "ActiveObject.h"
 
 using namespace Go;
 
-class PointDisplay : public DisplayObject, ActiveObject {
+class PointDisplay : public DisplayObject {
 
 	public:
 		Point point;
@@ -27,6 +26,10 @@ class PointDisplay : public DisplayObject, ActiveObject {
 		void processMousePassiveMotion(int x, int y);
 		void printDebugInfo();
 		void print(ostream *out);
+
+		void initMouseMasks();
+		void setMaskPos(int x, int y, bool value);
+		void paintMouseAreas(float r, float g, float b) ;
 
 	private:
 		int width;

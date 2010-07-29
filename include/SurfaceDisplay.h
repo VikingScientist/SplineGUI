@@ -4,7 +4,6 @@
 
 #include "DisplayObject.h"
 #include <GoTools/geometry/SplineSurface.h>
-#include "ActiveObject.h"
 #include <GL/glut.h>
 #include <vector>
 class CurveDisplay;
@@ -12,7 +11,7 @@ class CurveDisplay;
 using namespace std;
 using namespace Go;
 
-class SurfaceDisplay : public DisplayObject, ActiveObject {
+class SurfaceDisplay : public DisplayObject {
 	
 	public:
 		SplineSurface *surf;
@@ -34,6 +33,9 @@ class SurfaceDisplay : public DisplayObject, ActiveObject {
 		DISPLAY_CLASS_TYPE classType() { return SURFACE; }
 		void printDebugInfo();
 		void print(ostream *out);
+
+		void initMouseMasks() ;
+		void setMaskPos(int x, int y, bool value) ;
 			
 	
 	private:

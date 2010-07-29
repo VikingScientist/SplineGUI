@@ -3,10 +3,9 @@
 
 #include <GL/glut.h>
 #include "DisplayObject.h"
-#include "ActiveObject.h"
 class CurveDisplay;
 
-class CurvePoint : public DisplayObject, ActiveObject {
+class CurvePoint : public DisplayObject {
 
 	public:
 		CurvePoint(CurveDisplay *curve, double u);
