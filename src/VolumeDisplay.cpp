@@ -17,12 +17,25 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	resolution[2]  = 0;
 	draw_contol_mesh = false;
 
-	vector<boost::shared_ptr<SplineSurface> > edges = volume->getBoundarySurfaces(false);
+	vector<boost::shared_ptr<SplineSurface> > edges = volume->getBoundarySurfaces(true);
 	for(int i=0; i<6; i++) {
 		walls.push_back( new SurfaceDisplay(edges[i]->clone()) );
 		walls[i]->setFaceIndex(i);
 		walls[i]->setOrigin(this);
 	}
+	/*
+	walls[0]->setColor(0.,0.,1.);
+	walls[1]->setColor(0.,1.,0.);
+	walls[2]->setColor(0.,1.,1.);
+	walls[3]->setColor(1.,0.,0.);
+	walls[4]->setColor(1.,0.,1.);
+	walls[5]->setColor(1.,1.,0.);
+	*/
+	setColor(.6, .6, .6);
+
+	walls[1]->surf->reverseParameterDirection(true);
+	walls[2]->surf->reverseParameterDirection(true);
+	walls[5]->surf->reverseParameterDirection(true);
 }
 
 VolumeDisplay::~VolumeDisplay() {
@@ -33,6 +46,18 @@ VolumeDisplay::~VolumeDisplay() {
 	if(wallbuffer)     delete[] wallbuffer;
 	if(cp_pos)         delete[] cp_pos;
 	if(cp_lines)       delete[] cp_lines;
+}
+
+void VolumeDisplay::setSelectedColor(double r, double g, double b) {
+	DisplayObject::setSelectedColor(r,g,b);
+	for(int i=0; i<6; i++)
+		walls[i]->setSelectedColor(r,g,b);
+}
+
+void VolumeDisplay::setColor(double r, double g, double b) {
+	DisplayObject::setColor(r,g,b);
+	for(int i=0; i<6; i++)
+		walls[i]->setColor(r,g,b);
 }
 
 void VolumeDisplay::tesselate(int *n) {
@@ -200,5 +225,28 @@ void VolumeDisplay::print(ostream *out) {
 
 void VolumeDisplay::setDrawControlMesh(bool draw) {
 	draw_contol_mesh = draw;
+}
+
+void VolumeDisplay::initMouseMasks() {
+	if(wallbuffer) delete[] wallbuffer;
+	width = glutGet(GLUT_WINDOW_WIDTH);
+	height = glutGet(GLUT_WINDOW_HEIGHT);
+	wallbuffer = new GLfloat[3*width*height];
+	// for(int i=0; i<3*width*height; i++)
+		// wallbuffer[i] = 0.0;
+}
+
+void VolumeDisplay::setMaskPos(int x, int y, bool value) {
+	int k = (y*width+x)*3;
+	wallbuffer[k] = (value) ? 1.0 : 0.0;
+}
+
+void VolumeDisplay::paintMouseAreas(float r, float g, float b) {
+	walls[0]->paintMouseAreas(r,g,b);
+	walls[1]->paintMouseAreas(r,g,b);
+	walls[2]->paintMouseAreas(r,g,b);
+	walls[3]->paintMouseAreas(r,g,b);
+	walls[4]->paintMouseAreas(r,g,b);
+	walls[5]->paintMouseAreas(r,g,b);
 }
 

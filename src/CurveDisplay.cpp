@@ -21,6 +21,8 @@ CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 		start_p = NULL;
 		stop_p  = NULL;
 	}
+	setColor(0,0,0);
+	setSelectedColor(.8,.8,.8);
 }
 
 CurveDisplay::~CurveDisplay() {
@@ -153,7 +155,7 @@ void CurveDisplay::tesselate(int *n) {
 }
 
 void CurveDisplay::paint() {
-	glColor3f(0,0,0);
+	glColor3f(color[0],color[1],color[2]);
 	glLineWidth(2);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
@@ -162,7 +164,7 @@ void CurveDisplay::paint() {
 }
 
 void CurveDisplay::paintSelected() {
-	glColor3f(.9,.9,.9);
+	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glLineWidth(2);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
@@ -193,10 +195,12 @@ double CurveDisplay::parValueAtPosition(int x, int y) {
 
 void CurveDisplay::processMouse(int button, int state, int x, int y) {
 	
+	/*
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && xi_buffer[y*width+x] > 0.0) {
 		selected = !selected;
 		fireActionEvent(CURVE_SELECTED);
 	}
+	*/
 }
 
 void CurveDisplay::processMouseActiveMotion(int x, int y) {
@@ -205,9 +209,11 @@ void CurveDisplay::processMouseActiveMotion(int x, int y) {
 void CurveDisplay::processMousePassiveMotion(int x, int y) {
 }
 
+/*
 void CurveDisplay::setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
 	this->actionPerformed = actionPerformed;
 }
+*/
 
 void CurveDisplay::printDebugInfo() {
 	cout << *curve;
@@ -217,4 +223,24 @@ void CurveDisplay::print(ostream *out) {
 	ObjectHeader head(Class_SplineCurve, 1, 0);
 	(*out) << head;
 	(*out) << *curve;
+}
+
+void CurveDisplay::initMouseMasks() {
+	if(xi_buffer) delete[] xi_buffer;
+	width = glutGet(GLUT_WINDOW_WIDTH);
+	height = glutGet(GLUT_WINDOW_HEIGHT);
+	xi_buffer = new GLfloat[width*height];
+	// for(int i=0; i<width*height; i++)
+		// xi_buffer[i] = 0.0;
+}
+
+void CurveDisplay::setMaskPos(int x, int y, bool value) {
+	xi_buffer[y*width+x] = (value) ? 1.0 : 0.0;
+}
+
+void CurveDisplay::paintMouseAreas(float r, float g, float b) {
+	glLineWidth(10);
+	glColor3f(r,g,b);
+	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glDrawArrays(GL_LINE_STRIP, 0, resolution);
 }

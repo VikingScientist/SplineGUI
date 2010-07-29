@@ -17,6 +17,8 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
 	resolution[1]  = 0;
 	selected       = false;
 	faceIndex      = -1;
+	setColor(.8, .4, .05);
+	// setColor(.6, .6, .6);
 
 	vector<double> knotval1;
 	vector<double> knotval2;
@@ -127,7 +129,7 @@ void SurfaceDisplay::tesselate(int *n) {
 void SurfaceDisplay::paint() {
 	glEnable(GL_LIGHTING);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glColor3f(.8, .4, .05);
+	glColor3f(color[0], color[1], color[2]);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glNormalPointer(GL_DOUBLE, 0, normals);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
@@ -140,14 +142,14 @@ void SurfaceDisplay::paint() {
 
 void SurfaceDisplay::paintSelected() {
 	glEnable(GL_LIGHTING);
-	glColor3f(1.0, .7, .35);
+	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(3, GL_DOUBLE, 0, param_values);
+	// glEnableClientState(GL_COLOR_ARRAY);
+	// glColorPointer(3, GL_DOUBLE, 0, param_values);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glNormalPointer(GL_DOUBLE, 0, normals);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
-	glDisableClientState(GL_COLOR_ARRAY);
+	// glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisable(GL_LIGHTING);
 
@@ -259,5 +261,22 @@ void SurfaceDisplay::myGridEvaluator(int n1, int n2, vector<double>& pts, vector
 			}
 		}
 	}
+}
+
+void SurfaceDisplay::initMouseMasks() {
+	if(xi_buffer) delete[] xi_buffer;
+	if(eta_buffer) delete[] eta_buffer;
+	width = glutGet(GLUT_WINDOW_WIDTH);
+	height = glutGet(GLUT_WINDOW_HEIGHT);
+	xi_buffer = new GLfloat[width*height];
+	eta_buffer = new GLfloat[width*height];
+	// for(int i=0; i<width*height; i++) {
+		// xi_buffer[i] = 0.0;
+		// eta_buffer[i] = 0.0;
+	// }
+}
+
+void SurfaceDisplay::setMaskPos(int x, int y, bool value) {
+	xi_buffer[y*width+x] = (value) ? 1.0 : 0.0;
 }
 

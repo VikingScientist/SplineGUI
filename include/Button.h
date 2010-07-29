@@ -27,8 +27,11 @@ class Button : public MouseListener, ActiveObject {
 		void onEnter() ;
 		void onExit() ;
 		void setOnClick(void (*onClick)(Button*)) ;
+		void makeOnOffButton();
+		void setSelected(bool on);
 
 		string getText() const;
+		bool isSelected() const;
 
 		void setSizeAndPos(int x, int y, int width, int height) ;
 
@@ -42,6 +45,7 @@ class Button : public MouseListener, ActiveObject {
 		GLfloat r,g,b;
 		int bevel_size;
 		bool pressed;
+		bool isOnOffButton;
 };
 
 #endif

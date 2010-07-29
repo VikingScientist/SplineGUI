@@ -6,6 +6,12 @@
 #include <GoTools/geometry/SplineSurface.h>
 #include <GoTools/geometry/SplineCurve.h>
 
+#include "DisplayObject.h"
+#include "PointDisplay.h"
+#include "CurveDisplay.h"
+#include "SurfaceDisplay.h"
+#include "VolumeDisplay.h"
+
 #include <vector>
 
 class MouseListener;
@@ -37,6 +43,8 @@ namespace Workaround_namespace {
  * dialogs, but GLUT doesn't really make this easy).
  */
 
+typedef void (*keyListener)(unsigned char);
+
 class Fenris {
 	private:
 		Fenris();
@@ -49,12 +57,21 @@ class Fenris {
 
 		// data management
 		void addFile(const char *filename);
-		void addObject(Go::SplineCurve *c);
-		void addObject(Go::SplineSurface *s);
+		void addObject(Go::Point *p);
+		void addObject(Go::SplineCurve *c, bool clean=false);
+		void addObject(Go::SplineSurface *s, bool clean=false);
 		void addObject(Go::SplineVolume *v);
+		PointDisplay* getDisplayObject(Go::Point *p);
+		CurveDisplay* getDisplayObject(Go::SplineCurve *c);
+		SurfaceDisplay* getDisplayObject(Go::SplineSurface *s);
+		VolumeDisplay* getDisplayObject(Go::SplineVolume *v);
+		void hideObjects(DISPLAY_CLASS_TYPE type);
+		void unHideObjects(DISPLAY_CLASS_TYPE type);
+		vector<DisplayObject*> getSelectedObjects();
 
 		// interaction management
 		void addButton(Button *b);
+		void addKeyboardListener(void (*handleKeyPress)(unsigned char));
 
 		// window handling
 		void setSize(int width, int height);
@@ -77,12 +94,11 @@ class Fenris {
 				instance_ = new Fenris();
 			return instance_;
 		}
-};
 
-// initalizing functions
-void create_Fenris_GUI();
-void create_Fenris_GUI(Go::SplineVolume *v);
-void create_Fenris_GUI(const char *filename);
+		/*! \brief This shouldn't really be here (in the public section,
+		           but workaround-stuff requires it :( */
+		vector<keyListener> keyListeners_;
+};
 
 
 std::vector<Go::SplineVolume*>  getSelectedVolumes();

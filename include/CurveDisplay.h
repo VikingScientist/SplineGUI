@@ -5,7 +5,6 @@
 #include "DisplayObject.h"
 #include "PointDisplay.h"
 #include <GoTools/geometry/SplineCurve.h>
-#include "ActiveObject.h"
 #include <GL/glut.h>
 #include <vector>
 class CurvePoint;
@@ -15,7 +14,7 @@ using namespace Go;
 
 static const int CURVE_SELECTED = 0;
 
-class CurveDisplay : public DisplayObject, ActiveObject {
+class CurveDisplay : public DisplayObject {
 	
 	public:
 		SplineCurve *curve;
@@ -35,10 +34,12 @@ class CurveDisplay : public DisplayObject, ActiveObject {
 		void processMouse(int button, int state, int x, int y);
 		void processMouseActiveMotion(int x, int y);
 		void processMousePassiveMotion(int x, int y);
-		void setActionListener(void (*actionPerformed)(ActiveObject*, int));
 		DISPLAY_CLASS_TYPE classType() { return CURVE; }
 		void printDebugInfo();
 		void print(ostream *out);
+		void initMouseMasks();
+		void setMaskPos(int x, int y, bool value);
+		void paintMouseAreas(float r, float g, float b) ;
 			
 	
 	private:

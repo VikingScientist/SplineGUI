@@ -102,7 +102,7 @@ void CurvePoint::processMouseActiveMotion(int x, int y) {
 	if(curve->isAtPosition(x,y)) {
 		u = curve->parValueAtPosition(x,y);
 		tesselate(NULL);
-		fireActionEvent(REQUEST_REPAINT);
+		// fireActionEvent(REQUEST_REPAINT);
 	}
 }
 
