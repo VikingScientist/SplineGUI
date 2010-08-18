@@ -1,12 +1,12 @@
 //==============================================================================
 //!
-//! \file Fenris.cpp
+//! \file SplineGUI.cpp
 //!
 //! \date July 2010
 //!
 //! \author Kjetil A. Johannessen / SINTEF
 //!
-//! \brief Public and private access functions to the Fenris GUI class
+//! \brief Public and private access functions to the SplineGUI GUI class
 //!
 //==============================================================================
 
@@ -23,7 +23,7 @@
 #include <GoTools/geometry/ParamCurve.h>
 #include <GoTools/geometry/ObjectHeader.h>
 
-// Fenris headers
+// SplineGUI headers
 #include "Camera.h"
 #include "DisplayObjectSet.h"
 #include "CurvePoint.h"
@@ -32,7 +32,7 @@
 #include "VolumeDisplay.h"
 #include "OrthoProjection.h"
 #include "Button.h"
-#include "Fenris.h"
+#include "SplineGUI.h"
 typedef unsigned int uint;
 
 using namespace std;
@@ -40,11 +40,11 @@ using namespace boost;
 using namespace Go;
 using namespace Workaround_namespace;
 
-Fenris *Fenris::instance_ = NULL;
+SplineGUI *SplineGUI::instance_ = NULL;
 
 namespace Workaround_namespace {
 
-string fileUsage = "  fenris <inputFile> \n";
+string fileUsage = "  splineGUI <inputFile> \n";
 
 int window_width  = 1000;
 int window_height = 700;
@@ -230,9 +230,9 @@ void handleKeypress(unsigned char key, int x, int y) {
 		exit(0);
 	}
 
-	Fenris *f = Fenris::getInstance();
-	for(uint i=0; i<f->keyListeners_.size(); i++)
-		f->keyListeners_[i](key);
+	SplineGUI *gui = SplineGUI::getInstance();
+	for(uint i=0; i<gui->keyListeners_.size(); i++)
+		gui->keyListeners_[i](key);
 }
 
 void processMouse(int button, int state, int x, int y) {
@@ -332,8 +332,8 @@ void *start(void *arg) {
 } // namespace Workaround_namespace
 
 
-Fenris::Fenris() {
-	// initalize Fenris private attributes
+SplineGUI::SplineGUI() {
+	// initalize SplineGUI private attributes
 	next_button_x = 10;
 	next_button_y = 20;
 
@@ -343,7 +343,7 @@ Fenris::Fenris() {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(window_width, window_height);
 	
-	glutCreateWindow("Fenris");
+	glutCreateWindow("SplineGUI");
 	initRendering();
 	
 	glutDisplayFunc(drawScene);
@@ -374,7 +374,7 @@ Fenris::Fenris() {
 
  see the description on getInstance()
  *****************************************************************/
-void Fenris::show() {
+void SplineGUI::show() {
 	glutMainLoop();
 }
 
@@ -383,7 +383,7 @@ void Fenris::show() {
  \param width Width in pixels
  \param height Height in pixels
  *****************************************************************/
-void Fenris::setSize(int width, int height) {
+void SplineGUI::setSize(int width, int height) {
 	window_width  = width;
 	window_height = height;
 }
@@ -392,92 +392,65 @@ void Fenris::setSize(int width, int height) {
  \brief Adds .g2-file to display
  \param filename name of .g2-file to be read and added to the display list
  *****************************************************************/
-void Fenris::addFile(const char *filename) {
+void SplineGUI::addFile(const char *filename) {
 	readFile(filename);
 }
 
 //! \brief adds a single Point to be displayed
-void Fenris::addObject(Go::Point *p) {
+void SplineGUI::addObject(Go::Point *p) {
 	PointDisplay *obj = new PointDisplay(*p);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
 //! \brief adds a single SplineCurve to be displayed
-void Fenris::addObject(Go::SplineCurve *c, bool clean) {
+void SplineGUI::addObject(Go::SplineCurve *c, bool clean) {
 	CurveDisplay *obj = new CurveDisplay(c, clean);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
 //! \brief adds a single SplineSurface to be displayed
-void Fenris::addObject(Go::SplineSurface *s, bool clean) {
+void SplineGUI::addObject(Go::SplineSurface *s, bool clean) {
 	SurfaceDisplay *obj = new SurfaceDisplay(s, clean);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
 //! \brief adds a single SplineVolume to be displayed
-void Fenris::addObject(Go::SplineVolume *v) {
+void SplineGUI::addObject(Go::SplineVolume *v) {
 	VolumeDisplay *obj = new VolumeDisplay(v);
 	objectSet.addObject((DisplayObject*) obj);
 }
 
-PointDisplay* Fenris::getDisplayObject(Go::Point *p) {
-	vector<DisplayObject*>::iterator it;
-	for(it=objectSet.objects_begin(); it!=objectSet.objects_end(); it++) {
-		if((*it)->classType() == POINT) {
-			PointDisplay* pd = (PointDisplay*) *it;
-			if(pd->point.dist(*p) < 1e-4)
-				return pd;
-		}
-	}
-	return NULL;
+void SplineGUI::setSplineColor(float r, float g, float b) {
+	objectSet.setColor(VOLUME, r,g,b);
+	objectSet.setColor(SURFACE, r,g,b);
 }
 
-CurveDisplay* Fenris::getDisplayObject(Go::SplineCurve *c) {
-	vector<DisplayObject*>::iterator it;
-	for(it=objectSet.objects_begin(); it!=objectSet.objects_end(); it++) {
-		if((*it)->classType() == CURVE) {
-			CurveDisplay* cd = (CurveDisplay*) *it;
-			if(cd->curve == c)
-				return cd;
-		}
-	}
-	return NULL;
+PointDisplay* SplineGUI::getDisplayObject(Go::Point *p) {
+	return objectSet.getDisplayObject(p);
 }
 
-SurfaceDisplay* Fenris::getDisplayObject(Go::SplineSurface *s) {
-	vector<DisplayObject*>::iterator it;
-	for(it=objectSet.objects_begin(); it!=objectSet.objects_end(); it++) {
-		if((*it)->classType() == SURFACE) {
-			SurfaceDisplay* sd = (SurfaceDisplay*) *it;
-			if(sd->surf == s)
-				return sd;
-		}
-	}
-	return NULL;
+CurveDisplay* SplineGUI::getDisplayObject(Go::SplineCurve *c) {
+	return objectSet.getDisplayObject(c);
 }
 
-VolumeDisplay* Fenris::getDisplayObject(Go::SplineVolume *v) {
-	vector<DisplayObject*>::iterator it;
-	for(it=objectSet.objects_begin(); it!=objectSet.objects_end(); it++) {
-		if((*it)->classType() == VOLUME) {
-			VolumeDisplay* vd = (VolumeDisplay*) *it;
-			if(vd->volume == v)
-				return vd;
-		}
-	}
-	return NULL;
+SurfaceDisplay* SplineGUI::getDisplayObject(Go::SplineSurface *s) {
+	return objectSet.getDisplayObject(s);
+}
+
+VolumeDisplay* SplineGUI::getDisplayObject(Go::SplineVolume *v) {
+	return objectSet.getDisplayObject(v);
 }
 
 
-vector<DisplayObject*> Fenris::getSelectedObjects() {
+vector<DisplayObject*> SplineGUI::getSelectedObjects() {
 	return objectSet.getSelectedObjects();
 }
 
-void Fenris::hideObjects(DISPLAY_CLASS_TYPE type) {
+void SplineGUI::hideObjects(DISPLAY_CLASS_TYPE type) {
 	objectSet.hideObjects(type);
 }
 
-void Fenris::unHideObjects(DISPLAY_CLASS_TYPE type) {
+void SplineGUI::unHideObjects(DISPLAY_CLASS_TYPE type) {
 	objectSet.unHideObjects(type);
 }
 
@@ -504,7 +477,7 @@ vector<SplineSurface*> getSelectedSurfaces() {
 	return results;
 }
 
-void Fenris::addButton(Button *b) {
+void SplineGUI::addButton(Button *b) {
 	string text = b->getText();
 	int width   = text.length() * 6 + 28;
 	int height  = 30;
@@ -518,7 +491,11 @@ void Fenris::addButton(Button *b) {
 	buttons.push_back(b);
 }
 
-void Fenris::addKeyboardListener(void (*keyListener)(unsigned char)) {
+void SplineGUI::addKeyboardListener(void (*keyListener)(unsigned char)) {
 	keyListeners_.push_back(keyListener);
+}
+
+DisplayObjectSet* SplineGUI::getObjectSet() {
+	return &objectSet;
 }
 

@@ -17,8 +17,8 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
 	resolution[1]  = 0;
 	selected       = false;
 	faceIndex      = -1;
-	setColor(.8, .4, .05);
-	// setColor(.6, .6, .6);
+	setColor(.8, .4, .05); // orange
+	// setColor(.6, .6, .6); // light gray
 
 	vector<double> knotval1;
 	vector<double> knotval2;

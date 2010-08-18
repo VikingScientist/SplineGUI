@@ -175,6 +175,9 @@ void DisplayObjectSet::removeSelected() {
 	selected.clear();
 }
 
+/** \todo make it possible that items appear in BOTH the hidden vector and the objects vector
+          in the same way that the selected vector works */
+
 void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
 		if((*obj)->classType() == type || type==ALL) {
@@ -296,4 +299,104 @@ vector<DisplayObject*>::iterator DisplayObjectSet::objects_begin() {
 }
 vector<DisplayObject*>::iterator DisplayObjectSet::objects_end() {
 	return objects.end();
+}
+
+void DisplayObjectSet::setColor(DISPLAY_CLASS_TYPE type, float r, float g, float b) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++)
+		if((*it)->classType() == type || type == ALL)
+			(*it)->setColor(r,g,b);
+	for(it=hidden.begin(); it!=hidden.end(); it++)
+		if((*it)->classType() == type || type == ALL)
+			(*it)->setColor(r,g,b);
+}
+
+PointDisplay* DisplayObjectSet::getDisplayObject(Go::Point *p) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++) {
+		if((*it)->classType() == POINT) {
+			PointDisplay* pd = (PointDisplay*) *it;
+			if(pd->point.dist(*p) < 1e-4)
+				return pd;
+		}
+	}
+	for(it=hidden.begin(); it!=hidden.end(); it++) {
+		if((*it)->classType() == POINT) {
+			PointDisplay* pd = (PointDisplay*) *it;
+			if(pd->point.dist(*p) < 1e-4)
+				return pd;
+		}
+	}
+	return NULL;
+}
+
+CurveDisplay* DisplayObjectSet::getDisplayObject(Go::SplineCurve *c) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++) {
+		if((*it)->classType() == CURVE) {
+			CurveDisplay* cd = (CurveDisplay*) *it;
+			if(cd->curve == c)
+				return cd;
+		}
+	}
+	for(it=hidden.begin(); it!=hidden.end(); it++) {
+		if((*it)->classType() == CURVE) {
+			CurveDisplay* cd = (CurveDisplay*) *it;
+			if(cd->curve == c)
+				return cd;
+		}
+	}
+	return NULL;
+}
+
+SurfaceDisplay* DisplayObjectSet::getDisplayObject(Go::SplineSurface *s) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++) {
+		if((*it)->classType() == SURFACE) {
+			SurfaceDisplay* sd = (SurfaceDisplay*) *it;
+			if(sd->surf == s)
+				return sd;
+		}
+	}
+	for(it=hidden.begin(); it!=hidden.end(); it++) {
+		if((*it)->classType() == SURFACE) {
+			SurfaceDisplay* sd = (SurfaceDisplay*) *it;
+			if(sd->surf == s)
+				return sd;
+		}
+	}
+	return NULL;
+}
+
+VolumeDisplay* DisplayObjectSet::getDisplayObject(Go::SplineVolume *v) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++) {
+		if((*it)->classType() == VOLUME) {
+			VolumeDisplay* vd = (VolumeDisplay*) *it;
+			if(vd->volume == v)
+				return vd;
+		}
+	}
+	for(it=hidden.begin(); it!=hidden.end(); it++) {
+		if((*it)->classType() == VOLUME) {
+			VolumeDisplay* vd = (VolumeDisplay*) *it;
+			if(vd->volume == v)
+				return vd;
+		}
+	}
+	return NULL;
+}
+
+void DisplayObjectSet::setLineWidth(int width) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++)
+		if((*it)->classType() == CURVE)
+			((CurveDisplay*)*it)->setLineWidth(width);
+}
+
+void DisplayObjectSet::setPointSize(int size) {
+	vector<DisplayObject*>::iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++)
+		if((*it)->classType() == POINT)
+			((PointDisplay*)*it)->setPointSize(size);
 }

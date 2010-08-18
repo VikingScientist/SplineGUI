@@ -1,5 +1,5 @@
-#ifndef _FENRIS_H
-#define _FENRIS_H
+#ifndef _SPLINEGUI_H
+#define _SPLINEGUI_H
 
 // GoTools headers
 #include <GoTools/trivariate/SplineVolume.h>
@@ -14,6 +14,7 @@
 
 #include <vector>
 
+class DisplayObjectSet;
 class MouseListener;
 class ActiveObject;
 class Button;
@@ -45,10 +46,10 @@ namespace Workaround_namespace {
 
 typedef void (*keyListener)(unsigned char);
 
-class Fenris {
+class SplineGUI {
 	private:
-		Fenris();
-		static Fenris *instance_;
+		SplineGUI();
+		static SplineGUI *instance_;
 
 		int next_button_x;
 		int next_button_y;
@@ -56,6 +57,7 @@ class Fenris {
 	public:
 
 		// data management
+		DisplayObjectSet *getObjectSet();
 		void addFile(const char *filename);
 		void addObject(Go::Point *p);
 		void addObject(Go::SplineCurve *c, bool clean=false);
@@ -74,13 +76,14 @@ class Fenris {
 		void addKeyboardListener(void (*handleKeyPress)(unsigned char));
 
 		// window handling
+		void setSplineColor(float r, float g, float b);
 		void setSize(int width, int height);
 		void show();
 
 		/***************************************************//**
-		 \brief get Fenris GUI instance
+		 \brief get SplineGUI instance
 
-		 Gets the Fenris singelton object. This is the only way of
+		 Gets the SplineGUI singelton object. This is the only way of
 		 getting this object as the constructor has been made private.
 		 The window will not appear, until the show() function has been
 		 called. This will halt any program execution until the GUI
@@ -89,9 +92,9 @@ class Fenris {
 		 shown, all interaction with the program should be with either
 		 setActionListener (for buttons) or MouseListener.
 		******************************************************/
-		static Fenris* getInstance() {
+		static SplineGUI* getInstance() {
 			if(!instance_)
-				instance_ = new Fenris();
+				instance_ = new SplineGUI();
 			return instance_;
 		}
 

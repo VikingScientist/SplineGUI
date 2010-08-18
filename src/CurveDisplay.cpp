@@ -6,6 +6,7 @@
 
 CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	this->curve   = curve;
+	line_width    = 2;
 	positions     = NULL;
 	param_values  = NULL;
 	xi_buffer     = NULL;
@@ -156,22 +157,24 @@ void CurveDisplay::tesselate(int *n) {
 
 void CurveDisplay::paint() {
 	glColor3f(color[0],color[1],color[2]);
-	glLineWidth(2);
+	glLineWidth(line_width);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
 	if(start_p) start_p->paint();
-	if(stop_p) stop_p->paint();
+	if(stop_p)  stop_p->paint();
 }
 
 void CurveDisplay::paintSelected() {
 	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
-	glLineWidth(2);
+	glLineWidth(line_width);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+	if(start_p) start_p->paintSelected();
+	if(stop_p)  stop_p->paintSelected();
 }
 
 void CurveDisplay::paintMouseAreas() {
-	glLineWidth(10);
+	glLineWidth(line_width+8);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glColorPointer(3, GL_DOUBLE, 0, param_values);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
@@ -239,8 +242,12 @@ void CurveDisplay::setMaskPos(int x, int y, bool value) {
 }
 
 void CurveDisplay::paintMouseAreas(float r, float g, float b) {
-	glLineWidth(10);
+	glLineWidth(line_width+8);
 	glColor3f(r,g,b);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+}
+
+void CurveDisplay::setLineWidth(int line_width) {
+	this->line_width = line_width;
 }

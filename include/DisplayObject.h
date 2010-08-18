@@ -83,7 +83,7 @@ class DisplayObject : public MouseListener, ActiveObject {
 			color[2] = b;
 			if(!selected_color_specified)
 				for(int i=0; i<3; i++)
-					selected_color[i] = (color[i]+.2 > 1) ? 1 : color[i]+.5;
+					selected_color[i] = (color[i]+.4 > 1) ? 1 : color[i]+.4;
 			fireActionEvent(ACTION_REQUEST_REPAINT);
 		}
 
