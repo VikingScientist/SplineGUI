@@ -23,7 +23,7 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 		walls[i]->setFaceIndex(i);
 		walls[i]->setOrigin(this);
 	}
-	/*
+	/*  === Number the sides ===
 	walls[0]->setColor(0.,0.,1.);
 	walls[1]->setColor(0.,1.,0.);
 	walls[2]->setColor(0.,1.,1.);
@@ -31,7 +31,8 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	walls[4]->setColor(1.,0.,1.);
 	walls[5]->setColor(1.,1.,0.);
 	*/
-	setColor(.6, .6, .6);
+	// setColor(.6, .6, .6); // light gray
+	setColor(.8, .4, .05); // orange
 
 	walls[1]->surf->reverseParameterDirection(true);
 	walls[2]->surf->reverseParameterDirection(true);

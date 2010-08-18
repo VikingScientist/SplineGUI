@@ -5,6 +5,7 @@
 
 PointDisplay::PointDisplay(Point p) {
 	this->point = p;
+	size = 10;
 	bool_buffer = NULL;
 	setColor(.1,.1,.1);
 	setSelectedColor(.9,.9,.9);
@@ -18,24 +19,46 @@ void PointDisplay::tesselate(int *n) {
 }
 
 void PointDisplay::paint() {
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_NOTEQUAL, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+
 	glColor3f(color[0], color[1], color[2]);
-	glPointSize(10);
+	glPointSize(size);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
 	glEnd();
+
+	glDisable(GL_POINT_SMOOTH);
+	glBlendFunc(GL_NONE, GL_NONE);
+	glDisable(GL_BLEND);
 }
 
 void PointDisplay::paintSelected() {
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_NOTEQUAL, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+
 	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
-	glPointSize(10);
+	glPointSize(size);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
 	glEnd();
+
+	glDisable(GL_POINT_SMOOTH);
+	glBlendFunc(GL_NONE, GL_NONE);
+	glDisable(GL_BLEND);
 }
 
 void PointDisplay::paintMouseAreas() {
 	glColor3f(1,1,1);
-	glPointSize(16);
+	glPointSize(size+8);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
 	glEnd();
@@ -84,10 +107,14 @@ void PointDisplay::setMaskPos(int x, int y, bool value) {
 
 void PointDisplay::paintMouseAreas(float r, float g, float b) {
 	glColor3f(r,g,b);
-	glPointSize(16);
+	glPointSize(size+8);
 	glBegin(GL_POINTS);
 		glVertex3f(point[0], point[1], point[2]);
 	glEnd();
+}
+
+void PointDisplay::setPointSize(int size) {
+	this->size = size;
 }
 
 

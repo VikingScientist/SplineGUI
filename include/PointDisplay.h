@@ -31,9 +31,12 @@ class PointDisplay : public DisplayObject {
 		void setMaskPos(int x, int y, bool value);
 		void paintMouseAreas(float r, float g, float b) ;
 
+		void setPointSize(int size);
+
 	private:
 		int width;
 		int height;
+		int size;
 		GLfloat *bool_buffer;
 };
 

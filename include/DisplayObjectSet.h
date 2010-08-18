@@ -7,8 +7,13 @@
 #include "MVPHandler.h" 
 #include <vector>
 #include <set>
+#include "CurvePoint.h"
+#include "CurveDisplay.h"
+#include "SurfaceDisplay.h"
+#include "VolumeDisplay.h"
 
 using namespace std;
+
 
 class DisplayObjectSet : public MouseListener, ActiveObject {
 
@@ -30,11 +35,19 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void changeControlMesh();
 		void changeParametric();
 		void setActionListener(void (*actionPerformed)(ActiveObject*, int )) ;
+		void setColor(DISPLAY_CLASS_TYPE type, float r, float g, float b);
+		void setLineWidth(int width);
+		void setPointSize(int size);
+
 		vector<DisplayObject*> getSelectedObjects();
 		vector<DisplayObject*> getSelectedObjects(DISPLAY_CLASS_TYPE classType);
 		vector<DisplayObject*>::iterator objects_begin();
 		vector<DisplayObject*>::iterator objects_end();
 
+		PointDisplay* getDisplayObject(Go::Point *p);
+		CurveDisplay* getDisplayObject(Go::SplineCurve *c);
+		SurfaceDisplay* getDisplayObject(Go::SplineSurface *s);
+		VolumeDisplay* getDisplayObject(Go::SplineVolume *v);
 
 		bool hasNewObjects;
 

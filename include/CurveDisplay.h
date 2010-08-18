@@ -40,6 +40,8 @@ class CurveDisplay : public DisplayObject {
 		void initMouseMasks();
 		void setMaskPos(int x, int y, bool value);
 		void paintMouseAreas(float r, float g, float b) ;
+
+		void setLineWidth(int line_width);
 			
 	
 	private:
@@ -47,6 +49,7 @@ class CurveDisplay : public DisplayObject {
 		int resolution;
 		int width;
 		int height;
+		int line_width;
 		double *positions;
 		double *param_values;
 		GLfloat *xi_buffer;

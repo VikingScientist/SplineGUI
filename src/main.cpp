@@ -4,10 +4,10 @@
  * \author Kjetil A. Johannessen
  * \date July 2010
  *
- * \brief Program for displaying GoTools native file(s) through the simplest use of Fenris
+ * \brief Program for displaying GoTools native file(s) through the simplest use of SplineGUI
  *************************************************************************************/
  
-#include "Fenris.h"
+#include "SplineGUI.h"
 #include "Button.h"
 #include <iostream>
 
@@ -16,10 +16,10 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	Fenris *f = Fenris::getInstance();
+	SplineGUI *gui = SplineGUI::getInstance();
 	for(int argi=1; argi<argc; argi++)
-		f->addFile(argv[argi]);
-	f->show();
+		gui->addFile(argv[argi]);
+	gui->show();
 
 	return 0;
 }
