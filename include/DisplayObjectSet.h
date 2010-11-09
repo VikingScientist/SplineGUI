@@ -24,6 +24,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void paintAll();
 		void paintAllMouseAreas(vector<MVPHandler*> viewpanels);
 		void addObject(DisplayObject* obj);
+		void clear();
 		bool removeObject(DisplayObject* obj);
 		void removeSelected();
 		void hideObjects(DISPLAY_CLASS_TYPE type);
