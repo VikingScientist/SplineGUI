@@ -146,6 +146,13 @@ void DisplayObjectSet::addObject(DisplayObject* obj) {
 	hasNewObjects = true;
 }
 
+void DisplayObjectSet::clear() {
+	objects.clear();
+	selected.clear();
+	hidden.clear();
+	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
+}
+
 bool DisplayObjectSet::removeObject(DisplayObject* del_obj) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
 		if(del_obj == *obj) {

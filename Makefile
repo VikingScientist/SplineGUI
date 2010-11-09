@@ -2,7 +2,7 @@ CC = g++
 PROG = bin/SplineGUI
 
 GOTLIB     = -L/usr/local/lib/GoTools -lGoToolsCore -lGoTrivariate
-GLLIB      = -lglut
+GLLIB      = -lglut -lGLU
 
 CFLAGS = -Wall -g 
 

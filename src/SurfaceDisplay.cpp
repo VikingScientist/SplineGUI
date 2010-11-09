@@ -83,21 +83,33 @@ void SurfaceDisplay::tesselate(int *n) {
 	for(int j=0; j<n[1]; j++) {
 		for(int i=0; i<n[0]; i++) {
 			if(faceIndex < 0) {
-				param_values[k++] = (param_u[j]-p_u_min)/(p_u_max-p_u_min);
-				param_values[k++] = (param_v[i]-p_v_min)/(p_v_max-p_v_min);
+				param_values[k++] = (param_u[i]-p_u_min)/(p_u_max-p_u_min);
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
 				param_values[k++] = 0;
-			} else if(faceIndex > 3 ) {
-				param_values[k++] = (param_v[i]-p_v_min)/(p_v_max-p_v_min);
-				param_values[k++] = (param_u[j]-p_u_min)/(p_u_max-p_u_min);
-				param_values[k++] = (faceIndex==5) ? 1 : 0;
-			} else if(faceIndex == 2 || faceIndex == 3) {
-				param_values[k++] = (param_v[i]-p_v_min)/(p_v_max-p_v_min);
-				param_values[k++] = (faceIndex==3) ? 1 : 0;
-				param_values[k++] =  (param_u[j]-p_u_min)/(p_u_max-p_u_min);
-			} else if(faceIndex == 0 || faceIndex == 1) {
-				param_values[k++] = (faceIndex==1) ? 1 : 0;
-				param_values[k++] = (param_v[i]-p_v_min)/(p_v_max-p_v_min);
-				param_values[k++] = (param_u[j]-p_u_min)/(p_u_max-p_u_min);
+			} else if(faceIndex == 0) {
+				param_values[k++] = 0;
+				param_values[k++] = (param_u[i]-p_u_min)/(p_u_max-p_u_min);
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+			} else if(faceIndex == 1) { // reversed parameter direction to get right normals
+				param_values[k++] = 1;
+				param_values[k++] = (p_u_max-param_u[i])/(p_u_max-p_u_min);
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+			} else if(faceIndex == 2) { // reversed parameter direction to get right normals
+				param_values[k++] = (p_u_max-param_u[i])/(p_u_max-p_u_min);
+				param_values[k++] = 0;
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+			} else if(faceIndex == 3) {
+				param_values[k++] = (param_u[i]-p_u_min)/(p_u_max-p_u_min);
+				param_values[k++] = 1;
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+			} else if(faceIndex == 4) {
+				param_values[k++] = (param_u[i]-p_u_min)/(p_u_max-p_u_min);
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+				param_values[k++] = 0;
+			} else if(faceIndex == 5) { // reversed parameter direction to get right normals
+				param_values[k++] = (p_u_max-param_u[i])/(p_u_max-p_u_min);
+				param_values[k++] = (param_v[j]-p_v_min)/(p_v_max-p_v_min);
+				param_values[k++] = 1;
 			}
 		}
 	}
@@ -143,9 +155,9 @@ void SurfaceDisplay::paint() {
 void SurfaceDisplay::paintSelected() {
 	glEnable(GL_LIGHTING);
 	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
-	glEnableClientState(GL_NORMAL_ARRAY);
+	// glEnableClientState(GL_NORMAL_ARRAY);
 	// glEnableClientState(GL_COLOR_ARRAY);
-	// glColorPointer(3, GL_DOUBLE, 0, param_values);
+	glColorPointer(3, GL_DOUBLE, 0, param_values);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glNormalPointer(GL_DOUBLE, 0, normals);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
