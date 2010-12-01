@@ -52,6 +52,7 @@ void DisplayObjectSet::paintSelectionBox() {
 	double x2 = ((double) drawX  )/vp[2]*2 - 1;
 	double y2 = ((double) drawY  )/vp[3]*2 - 1;
 	glLineWidth(1);
+	glColor3f(0,0,0);
 	glBegin(GL_LINE_STRIP);
 		glVertex2f(x1,y1);
 		glVertex2f(x1,y2);
