@@ -69,12 +69,16 @@ void VolumeDisplay::tesselate(int *n) {
 	resolution[1]  = n[1];
 	resolution[2]  = n[2];
 	
+	/*
 	walls[0]->tesselate(eta_zeta);
 	walls[1]->tesselate(eta_zeta);
 	walls[2]->tesselate(xi_zeta);
 	walls[3]->tesselate(xi_zeta);
 	walls[4]->tesselate(xi_eta);
 	walls[5]->tesselate(xi_eta);
+	*/
+	for(int i=0; i<6; i++)
+		walls[i]->tesselate();
 
 	if(cp_pos)   delete[] cp_pos;
 	if(cp_lines) delete[] cp_lines;

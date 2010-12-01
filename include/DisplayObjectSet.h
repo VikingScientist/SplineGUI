@@ -21,6 +21,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		DisplayObjectSet();
 		void tesselateAll();
 		void tesselateAll(int *n);
+		void paintSelectionBox();
 		void paintAll();
 		void paintAllMouseAreas(vector<MVPHandler*> viewpanels);
 		void addObject(DisplayObject* obj);
@@ -63,6 +64,8 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		bool control_mesh;
 		bool left_mouse_held;
 		bool parametric;
+		int startX, startY;
+		int drawX, drawY;
 		GLfloat *wallbuffer;
 };
 

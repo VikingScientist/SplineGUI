@@ -134,14 +134,38 @@ void CurveDisplay::tesselate(int *n) {
 	if(positions)    delete[] positions;
 	if(param_values) delete[] param_values;
 
-	resolution = n[0];
-	positions = new double[n[0]*3];
-	param_values = new double[n[0]*3];
 	double p_min = curve->startparam();
 	double p_max = curve->endparam();
 	vector<Point> pts;
 	vector<double> param;
-	curve->uniformEvaluator(resolution, pts, param);
+	if(n==NULL) {
+		n = new int[1];
+		vector<double> uniqueKnots;
+		curve->basis().knotsSimple(uniqueKnots);
+		/*
+		int pu = curve->order();
+		n[0]   = (pu-1)*3;
+		for(uint i=0; i<uniqueKnots.size()-1; i++)
+			for(int j=0; j<n[0]; j++)
+				param.push_back( uniqueKnots[i] + j*(uniqueKnots[i+1]-uniqueKnots[i])/(n[0]) );
+		param.push_back(uniqueKnots.back());
+		n[0] = param.size();
+		for(int i=0; i<n[0]; i++) {
+			Point p;
+			curve->point(p, param[i]);
+			pts.push_back(p);
+		}
+	} else {
+		curve->uniformEvaluator(n[0], pts, param);
+	}
+	*/
+		n[0] = (uniqueKnots.size()-1)*(curve->order()-1)*3;
+	}
+	curve->uniformEvaluator(n[0], pts, param);
+
+	resolution = n[0];
+	positions    = new double[n[0]*3];
+	param_values = new double[n[0]*3];
 	int k=0;
 	for(int i=0; i<resolution; i++) {
 		for(int d=0; d<pts[i].dimension(); d++) {

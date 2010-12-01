@@ -37,7 +37,7 @@ class DisplayObject : public MouseListener, ActiveObject {
 		}
 		~DisplayObject() { }
 		// all below methods SHOULD be overwritten in all implementing classes (java interface-like)
-		virtual void tesselate(int *n) { }
+		virtual void tesselate(int *n=NULL) { }
 		virtual void paint() { }
 		virtual void paintSelected() { }
 		virtual void paintMouseAreas() { }
