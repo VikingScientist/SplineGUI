@@ -19,7 +19,7 @@ class SurfaceDisplay : public DisplayObject {
 		SurfaceDisplay(SplineSurface *surf, bool clean=false) ;
 		~SurfaceDisplay();
 		void setFaceIndex(int i);
-		void tesselate(int *n);
+		void tesselate(int *n=NULL);
 		void paint();
 		void paintSelected();
 		void paintMouseAreas();

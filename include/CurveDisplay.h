@@ -23,7 +23,7 @@ class CurveDisplay : public DisplayObject {
 		CurveDisplay(SplineCurve *curve, bool clean=false);
 		~CurveDisplay();
 		void reTesselate();
-		void tesselate(int *n);
+		void tesselate(int *n=NULL);
 		void paint();
 		void paintSelected();
 		void paintMouseAreas();

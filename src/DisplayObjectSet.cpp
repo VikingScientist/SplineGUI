@@ -13,6 +13,10 @@ DisplayObjectSet::DisplayObjectSet() {
 	hasNewObjects         = false;
 	control_mesh          = false;
 	parametric            = false;
+	startX                = -1;
+	startY                = -1;
+	drawX                 = -1;
+	drawY                 = -1;
 	default_resolution[0] = 40;
 	default_resolution[1] = 40;
 	default_resolution[2] = 40;
@@ -36,6 +40,25 @@ void DisplayObjectSet::setActionListener(void (*actionPerformed)(ActiveObject*, 
 	this->actionPerformed = actionPerformed;
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->setActionListener(actionPerformed);
+}
+
+void DisplayObjectSet::paintSelectionBox() {
+	if(!left_mouse_held)
+		return;
+	int vp[4]; // vp = viewport(x,y,widht,height)
+	glGetIntegerv(GL_VIEWPORT, vp);
+	double x1 = ((double) startX )/vp[2]*2 - 1;
+	double y1 = ((double) startY )/vp[3]*2 - 1;
+	double x2 = ((double) drawX  )/vp[2]*2 - 1;
+	double y2 = ((double) drawY  )/vp[3]*2 - 1;
+	glLineWidth(1);
+	glBegin(GL_LINE_STRIP);
+		glVertex2f(x1,y1);
+		glVertex2f(x1,y2);
+		glVertex2f(x2,y2);
+		glVertex2f(x2,y1);
+		glVertex2f(x1,y1);
+	glEnd();
 }
 
 /*! \todo Figure out why paintAll is called 4 times on startup and on each mousebutton-press */
@@ -223,33 +246,36 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 	if(control_mesh) return;
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		left_mouse_held = true;
+		startX = x;
+		startY = y;
+		drawX  = x;
+		drawY  = y;
+	} else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
 		if(! (glutGetModifiers() & GLUT_ACTIVE_CTRL) ) {
 			for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
 				(*obj)->setSelected(false);
 			selected.clear();
 		}
-		/*
-		for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj) {
-			if( (glutGetModifiers()       &  GLUT_ACTIVE_SHIFT) &&
-			    (*obj)->classType()       == VOLUME             &&
-			    (*obj)->isAtPosition(x,y)                       &&
-				(classType==ALL           || classType==SURFACE) ) {
-				DisplayObject* surf_edge = (DisplayObject*) ((VolumeDisplay*)(*obj))->getSurfaceAt(x,y);
-				selected.push_back( surf_edge );
-				surf_edge->setSelected(true);
-			} else if((*obj)->isAtPosition(x,y) && (classType==ALL || classType==(*obj)->classType()) ) {
-				selected.push_back( (*obj ));
-				(*obj)->setSelected(true);
+		if(abs(startX-drawX)+abs(startY-drawY) < 3) {
+			int obj_i = objectAtPosition(x,y);
+			if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
+				selected.insert(objects[obj_i]);
+			}
+		} else {
+			int lowx  = (startX<drawX) ? startX : drawX;
+			int highx = (startX<drawX) ? drawX  : startX;
+			int lowy  = (startY<drawY) ? startY : drawY;
+			int highy = (startY<drawY) ? drawY  : startY;
+			for(int xi=lowx; xi<=highx; xi++) {
+				for(int yi=lowy; yi<=highy; yi++) {
+					int obj_i = objectAtPosition(xi,yi);
+					if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
+						selected.insert(objects[obj_i]);
+					}
+				}
 			}
 		}
-		*/
-		int obj_i = objectAtPosition(x,y);
-		if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
-			selected.insert(objects[obj_i]);
-		}
 
-		fireActionEvent(ACTION_REQUEST_REPAINT);
-	} else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
 		left_mouse_held = false;
 		fireActionEvent(ACTION_REQUEST_REPAINT);
 	}
@@ -261,6 +287,9 @@ void DisplayObjectSet::processMouseActiveMotion(int x, int y) {
 	for(set<DisplayObject*>::iterator obj=selected.begin(); obj != selected.end(); ++obj)
 		if(((*obj)->classType()==classType || classType==ALL) )
 			(*obj)->processMouseActiveMotion(x,y);
+	drawX = x;
+	drawY = y;
+	fireActionEvent(ACTION_REQUEST_REPAINT);
 }
 
 void DisplayObjectSet::processMousePassiveMotion(int x, int y) {

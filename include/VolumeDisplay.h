@@ -19,7 +19,7 @@ class VolumeDisplay : public DisplayObject {
 
 		VolumeDisplay(SplineVolume *volume);
 		~VolumeDisplay();
-		void tesselate(int *n);
+		void tesselate(int *n=NULL);
 		void paint();
 		void paintSelected();
 		void paintMouseAreas();
