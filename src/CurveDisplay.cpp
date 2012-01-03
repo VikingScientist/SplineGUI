@@ -1,3 +1,14 @@
+//==============================================================================
+//!
+//! \file CurveDisplay.cpp
+//!
+//! \date July 2010
+//!
+//! \author Kjetil A. Johannessen / SINTEF
+//!
+//! \brief Display wrapper for Spline Curves
+//! 
+//==============================================================================
 
 #include "CurveDisplay.h"
 #include "CurvePoint.h"
@@ -7,6 +18,11 @@
 using namespace Go;
 using namespace std;
 
+/**********************************************************************************//**
+ * \brief Constructor
+ * \param curve the actual Spline Curve data (i.e. knots and control points etc)
+ * \param clean false will render a PointDisplay on the start and end point of the curve
+ *************************************************************************************/
 CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	this->curve   = curve;
 	line_width    = 2;
@@ -29,6 +45,7 @@ CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	setSelectedColor(.8,.8,.8);
 }
 
+//! \brief destructor
 CurveDisplay::~CurveDisplay() {
 	if(positions)    delete[] positions;
 	if(param_values) delete[] param_values;
@@ -129,10 +146,15 @@ bool CurveDisplay::splitPeriodicCurveInFour(vector<CurvePoint*> splits, vector<S
 	return true;
 }
 
+//! \brief tesselates the curve with the stored resoltuion
 void CurveDisplay::reTesselate() {
 	tesselate(&resolution);
 }
 
+/**********************************************************************************//**
+ * \brief tesselates the curve
+ * \param n pointer to the number of tesselation points (DisplayCurve takes int[1] as input while DisplaySurface takes n[2] and Volume n[3])
+ *************************************************************************************/
 void CurveDisplay::tesselate(int *n) {
 	if(positions)    delete[] positions;
 	if(param_values) delete[] param_values;
@@ -182,6 +204,7 @@ void CurveDisplay::tesselate(int *n) {
 	if(stop_p) stop_p->tesselate(&resolution);
 }
 
+//! \brief draw the curve using the proper GL calls
 void CurveDisplay::paint() {
 	glColor3f(color[0],color[1],color[2]);
 	glLineWidth(line_width);
@@ -191,6 +214,7 @@ void CurveDisplay::paint() {
 	if(stop_p)  stop_p->paint();
 }
 
+//! \brief draw the curve if it is selected by the user (brighter colors)
 void CurveDisplay::paintSelected() {
 	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glLineWidth(line_width);
@@ -200,6 +224,7 @@ void CurveDisplay::paintSelected() {
 	if(stop_p)  stop_p->paintSelected();
 }
 
+//! \brief draws the hidden buffer used for mouse input methods
 void CurveDisplay::paintMouseAreas() {
 	glLineWidth(line_width+8);
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
@@ -207,6 +232,7 @@ void CurveDisplay::paintMouseAreas() {
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
 }
 
+//! \brief reads the hidden buffer used for mouse input methods
 void CurveDisplay::readMouseAreas() {
 	if(xi_buffer) delete[] xi_buffer;
 	width = glutGet(GLUT_WINDOW_WIDTH);
@@ -215,9 +241,12 @@ void CurveDisplay::readMouseAreas() {
 	glReadPixels(0, 0, width, height, GL_RED, GL_FLOAT, xi_buffer);
 }
 
+//! \brief returns true if the curve is at the given screen (x,y) coordinates
 bool CurveDisplay::isAtPosition(int x, int y) {
 	return (xi_buffer[y*width+x] > 0.0);
 }
+
+//! \brief returns the parameter value of the curve at screen (x,y) position (normalized to (0,1) )
 double CurveDisplay::parValueAtPosition(int x, int y) {
 	return xi_buffer[y*width+x];
 }
@@ -245,10 +274,12 @@ void CurveDisplay::setActionListener(void (*actionPerformed)(ActiveObject*, int 
 }
 */
 
+//! \brief dumps the knot vector and control points to standard out
 void CurveDisplay::printDebugInfo() {
 	cout << *curve;
 }
 
+//! \brief writes a proper .g2-format (GoTools) representation of the curve to &out
 void CurveDisplay::print(ostream *out) {
 	ObjectHeader head(Class_SplineCurve, 1, 0);
 	(*out) << head;
@@ -275,6 +306,7 @@ void CurveDisplay::paintMouseAreas(float r, float g, float b) {
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
 }
 
+//! \brief sets the curve render width (measured in pixels)
 void CurveDisplay::setLineWidth(int line_width) {
 	this->line_width = line_width;
 }

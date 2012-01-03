@@ -8,12 +8,17 @@
 //!
 //! \brief Button primitive for GUI control
 //!
+//! 
 //==============================================================================
 
 
 #include "Button.h"
 #include <iostream>
 
+/**********************************************************************************//**
+ * \brief Constructor
+ * \param text Text which is to appear on the button
+ *************************************************************************************/
 Button::Button(std::string text) : MouseListener(0,0,0,0) {
 	this->x      = 0;
 	this->y      = 0;
@@ -29,6 +34,14 @@ Button::Button(std::string text) : MouseListener(0,0,0,0) {
 	onClick = NULL;
 }
 
+/**********************************************************************************//**
+ * \brief Constructor
+ * \param text Text which is to appear on the button
+ * \param x Absolute x-position in the GLU window for the button
+ * \param y Absolute y-position in the GLU window for the button
+ * \param width The horizontal size of the button
+ * \param height The vertical size of the button
+ *************************************************************************************/
 Button::Button(std::string text, int x, int y, int width, int height) : MouseListener(x,y,width,height) {
 	this->x      = x;
 	this->y      = y;
@@ -43,6 +56,11 @@ Button::Button(std::string text, int x, int y, int width, int height) : MouseLis
 	onClick = NULL;
 }
 
+/**********************************************************************************//**
+ * \brief draw method
+ *
+ * Called whenever the button needs to be drawn on screen
+ *************************************************************************************/
 void Button::paint() {
 	int vp[4]; // vp = viewport(x,y,widht,height)
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -118,6 +136,17 @@ void Button::paint() {
 		
 }
 
+/**********************************************************************************//**
+ * \brief Print GLUT text
+ * \param x position of the lower left corner of the text start
+ * \param y position of the lower left corner of the text start
+ * \param font font used for text display
+ * \param text the displayed text
+ * \param r red color 
+ * \param g green color
+ * \param b blue color
+ * \param a opacity alpha 
+ *************************************************************************************/
 void Button::glutPrint(float x, float y, void* font, std::string text, float r, float g, float b, float a)
 {
 	int vp[4]; // vp = viewport(x,y,widht,height)
@@ -136,6 +165,13 @@ void Button::glutPrint(float x, float y, void* font, std::string text, float r, 
 	if(!blending) glDisable(GL_BLEND);
 }  
 
+/**********************************************************************************//**
+ * \brief Mouse action event
+ * \param button which mouse button was pressed or released
+ * \param state button pressed or released
+ * \param x position of the mouse at the time of use
+ * \param y position of the mouse at the time of use
+ *************************************************************************************/
 void Button::processMouse(int button, int state, int x, int y) {
 	if(button != GLUT_LEFT_BUTTON) return;
 	if(state == GLUT_DOWN && !pressed) {
@@ -185,10 +221,17 @@ void Button::setSizeAndPos(int x, int y, int width, int height) {
 	MouseListener::setSize(x,y,width,height);
 }
 
+/**********************************************************************************//**
+ * \brief Button will be stay in "pushed" state until another click for release
+ *************************************************************************************/
 void Button::makeOnOffButton() {
 	isOnOffButton = true;
 }
 
+/**********************************************************************************//**
+ * \brief In case of on/off button this sets the button in pushed state or not
+ * \param on is pushed down
+ *************************************************************************************/
 void Button::setSelected(bool on) {
 	if(!isOnOffButton) return;
 	if(on != pressed) {
@@ -203,6 +246,10 @@ void Button::setSelected(bool on) {
 	}
 }
 
+/**********************************************************************************//**
+ * \brief In case of on/off button this gets the button in pushed state or not
+ * \returns true if the button is pushed down
+ *************************************************************************************/
 bool Button::isSelected() const {
 	return pressed;
 }
@@ -212,14 +259,14 @@ std::string Button::getText() const {
 	return text;
 }
 
-/**
+/**********************************************************************************//**
  * \brief Sets the function which is to be called in the case of the button being clicked
  * \param onClick pointer to the function which is to be executed
  * 
  * This is the primary interaction point for the Fenris program. It is possible to distinguish
  * between different buttons by testing on the caller (which is passed as the Button* argument)
  * if one where to use the same function for different buttons.
- */
+ *************************************************************************************/
 void Button::setOnClick(void (*onClick)(Button*)) {
 	this->onClick = onClick;
 }
