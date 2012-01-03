@@ -3,6 +3,9 @@
 #include <GL/glut.h>
 #include <GoTools/geometry/ObjectHeader.h>
 
+using namespace Go;
+using namespace std;
+
 VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	this->volume = volume;
 	positions      = NULL;
@@ -17,7 +20,7 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	resolution[2]  = 0;
 	draw_contol_mesh = false;
 
-	vector<boost::shared_ptr<SplineSurface> > edges = volume->getBoundarySurfaces(true);
+	vector<std::shared_ptr<SplineSurface> > edges = volume->getBoundarySurfaces(true);
 	for(int i=0; i<6; i++) {
 		walls.push_back( new SurfaceDisplay(edges[i]->clone()) );
 		walls[i]->setFaceIndex(i);

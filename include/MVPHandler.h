@@ -7,8 +7,6 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 
-using namespace std;
-
 class MVPHandler : public MouseListener, ActiveObject {
 
 	private:
@@ -52,7 +50,7 @@ class MVPHandler : public MouseListener, ActiveObject {
 		}
 		virtual void paintBackground() { }
 		virtual void paintMeta() { }
-		void glutPrint(float x, float y, void* font, string text, float r, float g, float b, float a)
+		void glutPrint(float x, float y, void* font, std::string text, float r, float g, float b, float a)
 {
 			bool blending = false;
 			if(glIsEnabled(GL_BLEND)) blending = true;

@@ -9,18 +9,14 @@
 #include <vector>
 class CurvePoint;
 
-using namespace std;
-using namespace Go;
-
 static const int CURVE_SELECTED = 0;
 
 class CurveDisplay : public DisplayObject {
 	
 	public:
-		SplineCurve *curve;
+		Go::SplineCurve *curve;
 
-		// CurveDisplay(boost::shared_ptr<SplineCurve> curve);
-		CurveDisplay(SplineCurve *curve, bool clean=false);
+		CurveDisplay(Go::SplineCurve *curve, bool clean=false);
 		~CurveDisplay();
 		void reTesselate();
 		void tesselate(int *n=NULL);
@@ -30,13 +26,13 @@ class CurveDisplay : public DisplayObject {
 		void readMouseAreas();
 		bool isAtPosition(int x, int y);
 		double parValueAtPosition(int x, int y);
-		bool splitPeriodicCurveInFour(vector<CurvePoint*> splits, vector<SplineCurve*> &ret_val);
+		bool splitPeriodicCurveInFour(std::vector<CurvePoint*> splits, std::vector<Go::SplineCurve*> &ret_val);
 		void processMouse(int button, int state, int x, int y);
 		void processMouseActiveMotion(int x, int y);
 		void processMousePassiveMotion(int x, int y);
 		DISPLAY_CLASS_TYPE classType() { return CURVE; }
 		void printDebugInfo();
-		void print(ostream *out);
+		void print(std::ostream *out);
 		void initMouseMasks();
 		void setMaskPos(int x, int y, bool value);
 		void paintMouseAreas(float r, float g, float b) ;

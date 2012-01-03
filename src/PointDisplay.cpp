@@ -3,6 +3,9 @@
 #include <GL/glu.h>
 #include <cmath>
 
+using namespace Go;
+using namespace std;
+
 PointDisplay::PointDisplay(Point p) {
 	this->point = p;
 	size = 10;

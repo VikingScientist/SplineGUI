@@ -14,7 +14,7 @@
 #include "Button.h"
 #include <iostream>
 
-Button::Button(string text) : MouseListener(0,0,0,0) {
+Button::Button(std::string text) : MouseListener(0,0,0,0) {
 	this->x      = 0;
 	this->y      = 0;
 	this->width  = 0;
@@ -29,7 +29,7 @@ Button::Button(string text) : MouseListener(0,0,0,0) {
 	onClick = NULL;
 }
 
-Button::Button(string text, int x, int y, int width, int height) : MouseListener(x,y,width,height) {
+Button::Button(std::string text, int x, int y, int width, int height) : MouseListener(x,y,width,height) {
 	this->x      = x;
 	this->y      = y;
 	this->width  = width;
@@ -118,7 +118,7 @@ void Button::paint() {
 		
 }
 
-void Button::glutPrint(float x, float y, void* font, string text, float r, float g, float b, float a)
+void Button::glutPrint(float x, float y, void* font, std::string text, float r, float g, float b, float a)
 {
 	int vp[4]; // vp = viewport(x,y,widht,height)
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -208,7 +208,7 @@ bool Button::isSelected() const {
 }
 
 //! \brief Get the descriptive button text 
-string Button::getText() const {
+std::string Button::getText() const {
 	return text;
 }
 

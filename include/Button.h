@@ -7,8 +7,6 @@
 #include <string>
 #include <GL/glut.h>
 
-using namespace std;
-
 /**
   * \todo Distinguish between the functions that the user needs access to and the functions
   *       that the GUI engine needs access to.
@@ -17,8 +15,8 @@ using namespace std;
 class Button : public MouseListener, ActiveObject {
 
 	public:
-		Button(string text);
-		Button(string text, int x, int y, int width, int height);
+		Button(std::string text);
+		Button(std::string text, int x, int y, int width, int height);
 
 		void paint();
 		void processMouse(int button, int state, int x, int y);
@@ -30,16 +28,16 @@ class Button : public MouseListener, ActiveObject {
 		void makeOnOffButton();
 		void setSelected(bool on);
 
-		string getText() const;
+		std::string getText() const;
 		bool isSelected() const;
 
 		void setSizeAndPos(int x, int y, int width, int height) ;
 
 	private:
-		void glutPrint(float x, float y, void* font, string text, float r, float g, float b, float a);
+		void glutPrint(float x, float y, void* font, std::string text, float r, float g, float b, float a);
 
 		void (*onClick)(Button*);
-		string text;
+		std::string text;
 		int x,y;
 		int width, height;
 		GLfloat r,g,b;

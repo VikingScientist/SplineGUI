@@ -12,9 +12,6 @@
 #include "SurfaceDisplay.h"
 #include "VolumeDisplay.h"
 
-using namespace std;
-
-
 class DisplayObjectSet : public MouseListener, ActiveObject {
 
 	public:
@@ -23,7 +20,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void tesselateAll(int *n);
 		void paintSelectionBox();
 		void paintAll();
-		void paintAllMouseAreas(vector<MVPHandler*> viewpanels);
+		void paintAllMouseAreas(std::vector<MVPHandler*> viewpanels);
 		void addObject(DisplayObject* obj);
 		void clear();
 		bool removeObject(DisplayObject* obj);
@@ -41,10 +38,10 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void setLineWidth(int width);
 		void setPointSize(int size);
 
-		vector<DisplayObject*> getSelectedObjects();
-		vector<DisplayObject*> getSelectedObjects(DISPLAY_CLASS_TYPE classType);
-		vector<DisplayObject*>::iterator objects_begin();
-		vector<DisplayObject*>::iterator objects_end();
+		std::vector<DisplayObject*> getSelectedObjects();
+		std::vector<DisplayObject*> getSelectedObjects(DISPLAY_CLASS_TYPE classType);
+		std::vector<DisplayObject*>::iterator objects_begin();
+		std::vector<DisplayObject*>::iterator objects_end();
 
 		PointDisplay* getDisplayObject(Go::Point *p);
 		CurveDisplay* getDisplayObject(Go::SplineCurve *c);
@@ -56,9 +53,9 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 	private:
 		int objectAtPosition(int x, int y);
 
-		vector<DisplayObject*> objects;
-		set<DisplayObject*> selected;
-		vector<DisplayObject*> hidden;
+		std::vector<DisplayObject*> objects;
+		std::set<DisplayObject*> selected;
+		std::vector<DisplayObject*> hidden;
 		DISPLAY_CLASS_TYPE classType;
 		int default_resolution[3];
 		bool control_mesh;

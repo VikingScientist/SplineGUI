@@ -36,7 +36,7 @@
 typedef unsigned int uint;
 
 using namespace std;
-using namespace boost;
+// using namespace boost;
 using namespace Go;
 using namespace Workaround_namespace;
 

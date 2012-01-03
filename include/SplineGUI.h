@@ -69,7 +69,7 @@ class SplineGUI {
 		VolumeDisplay* getDisplayObject(Go::SplineVolume *v);
 		void hideObjects(DISPLAY_CLASS_TYPE type);
 		void unHideObjects(DISPLAY_CLASS_TYPE type);
-		vector<DisplayObject*> getSelectedObjects();
+		std::vector<DisplayObject*> getSelectedObjects();
 
 		// interaction management
 		void addButton(Button *b);
@@ -100,7 +100,7 @@ class SplineGUI {
 
 		/*! \brief This shouldn't really be here (in the public section,
 		           but workaround-stuff requires it :( */
-		vector<keyListener> keyListeners_;
+		std::vector<keyListener> keyListeners_;
 };
 
 

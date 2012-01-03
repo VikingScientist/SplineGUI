@@ -9,15 +9,13 @@
 class CurveDisplay;
 class SurfaceDisplay;
 
-using namespace std;
-using namespace Go;
 
 class VolumeDisplay : public DisplayObject {
 	
 	public:
-		SplineVolume *volume;
+		Go::SplineVolume *volume;
 
-		VolumeDisplay(SplineVolume *volume);
+		VolumeDisplay(Go::SplineVolume *volume);
 		~VolumeDisplay();
 		void tesselate(int *n=NULL);
 		void paint();
@@ -31,7 +29,7 @@ class VolumeDisplay : public DisplayObject {
 		void processMousePassiveMotion(int x, int y);
 		DISPLAY_CLASS_TYPE classType() { return VOLUME; }
 		void printDebugInfo();
-		void print(ostream *out);
+		void print(std::ostream *out);
 		void setDrawControlMesh(bool draw);
 		void setSelectedColor(double r, double g, double b);
 		void setColor(double r, double g, double b);
@@ -56,7 +54,7 @@ class VolumeDisplay : public DisplayObject {
 		GLdouble *param_values;
 		GLuint *triangle_strip;
 		GLfloat *wallbuffer;
-		vector<SurfaceDisplay*> walls;
+		std::vector<SurfaceDisplay*> walls;
 };
 
 #endif
