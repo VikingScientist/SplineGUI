@@ -2,6 +2,7 @@
 #include "SurfaceDisplay.h"
 #include <GoTools/geometry/ObjectHeader.h>
 #include "CurveDisplay.h"
+#include "SplineGUI.h"
 
 using namespace Go;
 using namespace std;
@@ -25,8 +26,8 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
 	vector<double> knotval2;
 	surf->basis_u().knotsSimple(knotval1);
 	surf->basis_v().knotsSimple(knotval2);
-	vector<std::shared_ptr<SplineCurve> > const_crvs1;
-	vector<std::shared_ptr<SplineCurve> > const_crvs2;
+	vector<CurvePointer> const_crvs1;
+	vector<CurvePointer> const_crvs2;
 	surf->getConstParamCurves(knotval1, knotval2, const_crvs1, const_crvs2); 
 
 	if(!clean) {

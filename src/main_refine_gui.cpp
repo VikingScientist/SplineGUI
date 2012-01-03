@@ -30,7 +30,6 @@
 typedef unsigned int uint;
 
 using namespace std;
-using std::shared_ptr;
 
 // copy-paste some color-manipulation tools from a random webpage
 #define RETURN_HSV(h, s, v) {HSV.H = h; HSV.S = s; HSV.V = v; return HSV;}
@@ -80,10 +79,10 @@ RGBType HSV_to_RGB( HSVType HSV ) {
 } 
 
 SplineModel model;
-vector<shared_ptr<Go::SplineVolume> >           volumes;
-vector<vector<shared_ptr<Go::SplineSurface> > > surfaces;
-vector<vector<shared_ptr<Go::SplineCurve> > >   curves;
-vector<vector<shared_ptr<Go::Point> > >         points;
+vector<VolumePointer>           volumes;
+vector<vector<SurfacePointer> > surfaces;
+vector<vector<CurvePointer> >   curves;
+vector<vector<PointPointer> >   points;
 
 Button *showVolumes      = new Button("Volumes");
 Button *showFaces        = new Button("Faces");
@@ -315,19 +314,19 @@ void linkModelSplinesToGUI() {
 			surfaces[i][5]->reverseParameterDirection(true);
 
 			// add edges
-			vector<shared_ptr<Go::SplineCurve> > c;
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][4]->constParamCurve(pSpan[2], true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][4]->constParamCurve(pSpan[3], true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][5]->constParamCurve(pSpan[2], true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][5]->constParamCurve(pSpan[3], true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][4]->constParamCurve(pSpan[0], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][4]->constParamCurve(pSpan[1], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][5]->constParamCurve(pSpan[1], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][5]->constParamCurve(pSpan[0], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][2]->constParamCurve(pSpan[1], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][2]->constParamCurve(pSpan[0], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][3]->constParamCurve(pSpan[0], false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[i][3]->constParamCurve(pSpan[1], false)) );
+			vector<CurvePointer> c;
+			c.push_back(CurvePointer(surfaces[i][4]->constParamCurve(pSpan[2], true)) );
+			c.push_back(CurvePointer(surfaces[i][4]->constParamCurve(pSpan[3], true)) );
+			c.push_back(CurvePointer(surfaces[i][5]->constParamCurve(pSpan[2], true)) );
+			c.push_back(CurvePointer(surfaces[i][5]->constParamCurve(pSpan[3], true)) );
+			c.push_back(CurvePointer(surfaces[i][4]->constParamCurve(pSpan[0], false)) );
+			c.push_back(CurvePointer(surfaces[i][4]->constParamCurve(pSpan[1], false)) );
+			c.push_back(CurvePointer(surfaces[i][5]->constParamCurve(pSpan[1], false)) );
+			c.push_back(CurvePointer(surfaces[i][5]->constParamCurve(pSpan[0], false)) );
+			c.push_back(CurvePointer(surfaces[i][2]->constParamCurve(pSpan[1], false)) );
+			c.push_back(CurvePointer(surfaces[i][2]->constParamCurve(pSpan[0], false)) );
+			c.push_back(CurvePointer(surfaces[i][3]->constParamCurve(pSpan[0], false)) );
+			c.push_back(CurvePointer(surfaces[i][3]->constParamCurve(pSpan[1], false)) );
 			curves.push_back(c);
 
 			// add corners
@@ -338,7 +337,7 @@ void linkModelSplinesToGUI() {
 						volumes[i]->point(p, pSpan[0]*(1-u)+pSpan[1]*u,
 											 pSpan[2]*(1-v)+pSpan[3]*v,
 											 pSpan[4]*(1-w)+pSpan[5]*w);
-						points[i].push_back(shared_ptr<Go::Point>(new Go::Point(p)));
+						points[i].push_back(PointPointer(new Go::Point(p)));
 					}
 				}
 			}
@@ -408,11 +407,11 @@ void linkModelSplinesToGUI() {
 		for(uint i=0; i<surfaces[0].size(); i++) {
 			Go::RectDomain pSpan = surfaces[0][i]->parameterDomain();
 			// add edges
-			vector<shared_ptr<Go::SplineCurve> > c;
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[0][i]->constParamCurve(pSpan.vmin(), true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[0][i]->constParamCurve(pSpan.vmax(), true)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[0][i]->constParamCurve(pSpan.umin(), false)) );
-			c.push_back(shared_ptr<Go::SplineCurve>(surfaces[0][i]->constParamCurve(pSpan.umax(), false)) );
+			vector<CurvePointer> c;
+			c.push_back(CurvePointer(surfaces[0][i]->constParamCurve(pSpan.vmin(), true)) );
+			c.push_back(CurvePointer(surfaces[0][i]->constParamCurve(pSpan.vmax(), true)) );
+			c.push_back(CurvePointer(surfaces[0][i]->constParamCurve(pSpan.umin(), false)) );
+			c.push_back(CurvePointer(surfaces[0][i]->constParamCurve(pSpan.umax(), false)) );
 			curves.push_back(c);
 
 			// add corners
@@ -421,7 +420,7 @@ void linkModelSplinesToGUI() {
 					Go::Point p;
 					surfaces[0][i]->point(p, pSpan.umin()*(1-u)+pSpan.umax()*u,
 					                         pSpan.vmin()*(1-v)+pSpan.vmax()*v);
-					points[i].push_back(shared_ptr<Go::Point>(new Go::Point(p)));
+					points[i].push_back(PointPointer(new Go::Point(p)));
 				}
 			}
 		}
