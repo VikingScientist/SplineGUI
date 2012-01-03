@@ -1,3 +1,14 @@
+//==============================================================================
+//!
+//! \file Camera.cpp
+//!
+//! \date July 2010
+//!
+//! \author Kjetil A. Johannessen / SINTEF
+//!
+//! \brief Camera render view window
+//! 
+//==============================================================================
 
 #include <stdlib.h>
 #include <GL/glut.h>
@@ -21,6 +32,11 @@ void Camera::handleResize(int x, int y, int w, int h) {
 	// fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
 }
 
+/**********************************************************************************//**
+ * \brief Default constructor
+ * Sets a camera at 15 length units from the origin and looking towards if from 
+ * a default angle
+ *************************************************************************************/
 Camera::Camera() {
 	r                       = 15;
 	phi                     = M_PI_4;
@@ -36,6 +52,13 @@ Camera::Camera() {
 	recalc_pos();
 }
 
+/**********************************************************************************//**
+ * \brief Constructor
+ * \param x specifies the GLUT window coordinates where the camera view should be renedered
+ * \param y specifies the GLUT window coordinates where the camera view should be renedered
+ * \param w camera render area width
+ * \param h camera render area height
+ *************************************************************************************/
 Camera::Camera(int x, int y, int w, int h) : MVPHandler(x,y,w,h) {
 	r                       = 15;
 	phi                     = M_PI_4;
@@ -51,16 +74,30 @@ Camera::Camera(int x, int y, int w, int h) : MVPHandler(x,y,w,h) {
 	recalc_pos();
 }
 
+//! \brief Destructor
 Camera::~Camera() {
 	r     = 0;
 	phi   = 0;
 	theta = 0;
 }
 
+/**********************************************************************************//**
+ * \brief get an estimate of the tesselation resolution based on camera length
+ * \returns The number of tesselation points required in each parametric direction
+ *
+ * This function is a hand-waving estimate based solely on the length from the camera
+ * position to the camera look-at-point. The number returned is 120/sqrt(r)
+ *************************************************************************************/
 int Camera::getTesselationRes() {
 	return (int) (4.0*30/sqrt(r));
 }
 
+/**********************************************************************************//**
+ * \brief rotate camera
+ * \param d_r distance change from the the look-at-point (positive value for zooming in)
+ * \param d_phi angle-change from the z-axis (positive tilts the camera down making it look upwards)
+ * \param d_theta angle-change in the xy-plane (rotate around the object keeping z-height unchanged)
+ *************************************************************************************/
 void Camera::rotate(float d_r, float d_phi, float d_theta) {
 	float prev_r = r;
 	r     += d_r;
@@ -94,6 +131,11 @@ void Camera::rotate(float d_r, float d_phi, float d_theta) {
 	recalc_pos();
 }
 
+/**********************************************************************************//**
+ * \brief pans the camera
+ * \param d_u change in x-coordinate
+ * \param d_v change in y-coordinate
+ *************************************************************************************/
 void Camera::pan(float d_u, float d_v) {
 	
 	GLfloat cam[] = {look_at_x-x, look_at_y-y, look_at_z-z};
@@ -128,17 +170,24 @@ void Camera::pan(float d_u, float d_v) {
 	recalc_pos();
 }
 
+/**********************************************************************************//**
+ * \brief recalculate the x,y,z position based on the (r,theta,phi) position 
+ *************************************************************************************/
 void Camera::recalc_pos() {
 	x = r*cos(theta)*sin(phi) + look_at_x;
 	y = r*sin(theta)*sin(phi) + look_at_y;
 	z = r*cos(phi) + look_at_z;
 }
 
+/**********************************************************************************//**
+ * \brief DEPRECATED: used to update camera position in animations
+ *************************************************************************************/
 void Camera::update() {
 	// rotate(speed_r, speed_phi, speed_theta);
 	// pan(speed_pan_u, speed_pan_v);
 }
 
+//! \brief returns the distance between the view-to-point and the camera
 GLfloat Camera::getR() {
 	return r;
 }
@@ -147,12 +196,14 @@ GLfloat Camera::getR() {
 	// glViewport(0, 0, vp_width, vp_height);
 // }
 
+//! \brief sets the GL_PROJECTION matrix based on camera parameters
 void Camera::setProjection() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, (float)vp_width / (float)vp_height, 1.0, 700.0);
 }
 
+//! \brief sets the GL_MODELVIEW matrix based on camera parameters (plus lighting conditions)
 void Camera::setModelView() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -189,6 +240,13 @@ void Camera::setModelView() {
 
 }
 
+/**********************************************************************************//**
+ * \brief Mouse action event (clicking)
+ * \param button which mouse button was pressed or released
+ * \param state button pressed or released
+ * \param x position of the mouse at the time of use
+ * \param y position of the mouse at the time of use
+ *************************************************************************************/
 void Camera::processMouse(int button, int state, int x, int y) {
 	specialKey = glutGetModifiers();
 	if(button == GLUT_RIGHT_BUTTON) {
@@ -204,6 +262,11 @@ void Camera::processMouse(int button, int state, int x, int y) {
 	last_mouse_y = y;
 }
 
+/**********************************************************************************//**
+ * \brief Mouse action event (dragging)
+ * \param x position of the mouse at the time of use
+ * \param y position of the mouse at the time of use
+ *************************************************************************************/
 void Camera::processMouseActiveMotion(int x, int y) {
 	if(right_mouse_button_down) {
 		if(specialKey == GLUT_ACTIVE_CTRL) {
@@ -247,15 +310,27 @@ void Camera::processMouseActiveMotion(int x, int y) {
 	last_mouse_y = y;
 }
 
+/**********************************************************************************//**
+ * \brief Mouse action event (moving)
+ * \param x position of the mouse at the time of use
+ * \param y position of the mouse at the time of use
+ *************************************************************************************/
 void Camera::processMousePassiveMotion(int x, int y) {
 	last_mouse_x = x;
 	last_mouse_y = y;
 }
 
+/**********************************************************************************//**
+ * \brief sets adaptive tesselation
+ * if adaptive tesselation is turned on, then camera zooming will trigger events where
+ * the distance between the camera and look-at-point changes enough to request a
+ * retesselation of the splines
+ *************************************************************************************/
 void Camera::setAdaptiveTesselation() {
 	adaptive_tesselation = true;
 }
 
+//! \brief draws the bacground colors 
 void Camera::paintBackground() {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
@@ -275,6 +350,7 @@ void Camera::paintBackground() {
 	glEnable(GL_DEPTH_TEST);
 }
 
+//! \brief draws meta-information, i.e. the axis cross and the panel name "Perspective"
 void Camera::paintMeta() {
 	// draw axis cross
 	GLfloat axis_size = r / 10.0;
