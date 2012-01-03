@@ -5,8 +5,6 @@
 #include "ActiveObject.h"
 #include <iostream>
 
-using namespace std;
-
 enum DISPLAY_CLASS_TYPE {
 	NONE,
 	ALL,
@@ -48,7 +46,7 @@ class DisplayObject : public MouseListener, ActiveObject {
 		virtual void processMouseActiveMotion(int x, int y) { }
 		virtual void processMousePassiveMotion(int x, int y) { }
 		virtual void printDebugInfo() { }
-		virtual void print(ostream *out) { }
+		virtual void print(std::ostream *out) { }
 		virtual void setDrawControlMesh(bool draw) { }
 		virtual void setActionListener(void (*actionPerformed)(ActiveObject*, int )) { ActiveObject::setActionListener(actionPerformed); }
 

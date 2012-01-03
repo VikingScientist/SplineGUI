@@ -24,7 +24,7 @@ class CurvePoint : public DisplayObject {
 		void setParValue(double u);
 		double getParValue();
 		void printDebugInfo();
-		void print(ostream *out);
+		void print(std::ostream *out);
 
 	private:
 		void paintDirectionArrow();

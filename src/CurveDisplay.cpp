@@ -4,6 +4,9 @@
 #include <GoTools/geometry/ObjectHeader.h>
 #include <algorithm>
 
+using namespace Go;
+using namespace std;
+
 CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	this->curve   = curve;
 	line_width    = 2;
@@ -50,7 +53,7 @@ bool CurveDisplay::splitPeriodicCurveInFour(vector<CurvePoint*> splits, vector<S
 		vector<double> splitting_params;
 		for(int i=1; i<4; i++)
 			splitting_params.push_back(curve->startparam() + param[i]*(curve->endparam() - curve->startparam()) );
-		vector<boost::shared_ptr<SplineCurve> > split_from_gotools = curve->split(splitting_params);
+		vector<std::shared_ptr<SplineCurve> > split_from_gotools = curve->split(splitting_params);
 		for(int i=0; i<4; i++) // make duplicate objects since shared_ptr objects are deleted on function return
 			ret_val.push_back( split_from_gotools[i]->clone() );
 		return true;

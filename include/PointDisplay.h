@@ -5,14 +5,12 @@
 #include <GL/glut.h>
 #include "DisplayObject.h"
 
-using namespace Go;
-
 class PointDisplay : public DisplayObject {
 
 	public:
-		Point point;
+		Go::Point point;
 
-		PointDisplay(Point p);
+		PointDisplay(Go::Point p);
 		~PointDisplay();
 		void tesselate(int *n);
 		void paint();
@@ -25,7 +23,7 @@ class PointDisplay : public DisplayObject {
 		void processMouseActiveMotion(int x, int y);
 		void processMousePassiveMotion(int x, int y);
 		void printDebugInfo();
-		void print(ostream *out);
+		void print(std::ostream *out);
 
 		void initMouseMasks();
 		void setMaskPos(int x, int y, bool value);

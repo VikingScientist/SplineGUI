@@ -4,10 +4,9 @@ ENDIF(GPM_INCLUDES AND GPM_LIBRARIES)
 
 FIND_PATH(GPM_INCLUDES
           NAMES
-          primitives.h
+          GPM/primitives.h
           PATHS
-          $ENV{HOME}/include
-          PATH_SUFFIXES GPM)
+          $ENV{HOME}/include)
 
 FIND_LIBRARY(GPM_LIBRARIES 
              GPM

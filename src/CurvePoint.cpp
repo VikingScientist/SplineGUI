@@ -5,6 +5,8 @@
 #include <GL/glu.h>
 #include <cmath>
 
+using namespace std;
+
 CurvePoint::CurvePoint(CurveDisplay *curve, double u) {
 	this->curve = curve;
 	this->u = u;

@@ -1,6 +1,8 @@
 #include "OrthoProjection.h"
 #include <GL/glut.h>
 
+using namespace std;
+
 OrthoProjection::OrthoProjection() {
 	just_warped             = false;
 	right_mouse_button_down = false;
