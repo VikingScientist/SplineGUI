@@ -5,6 +5,7 @@
 #include <GoTools/trivariate/SplineVolume.h>
 #include <GoTools/geometry/SplineSurface.h>
 #include <GoTools/geometry/SplineCurve.h>
+#include <GoTools/geometry/GoTools.h>
 
 #include "DisplayObject.h"
 #include "PointDisplay.h"
@@ -13,6 +14,18 @@
 #include "VolumeDisplay.h"
 
 #include <vector>
+
+#if defined(GO_VERSION_MAJOR) && GO_VERSION_MAJOR >= 3
+typedef std::shared_ptr<Go::Point>         PointPointer;
+typedef std::shared_ptr<Go::SplineCurve>   CurvePointer;
+typedef std::shared_ptr<Go::SplineSurface> SurfacePointer;
+typedef std::shared_ptr<Go::SplineVolume>  VolumePointer; 
+#else
+typedef boost::shared_ptr<Go::Point>         PointPointer;
+typedef boost::shared_ptr<Go::SplineCurve>   CurvePointer;
+typedef boost::shared_ptr<Go::SplineSurface> SurfacePointer;
+typedef boost::shared_ptr<Go::SplineVolume>  VolumePointer; 
+#endif
 
 class DisplayObjectSet;
 class MouseListener;

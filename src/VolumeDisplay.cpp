@@ -1,5 +1,6 @@
 #include "VolumeDisplay.h"
 #include "SurfaceDisplay.h"
+#include "SplineGUI.h"
 #include <GL/glut.h>
 #include <GoTools/geometry/ObjectHeader.h>
 
@@ -20,7 +21,7 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	resolution[2]  = 0;
 	draw_contol_mesh = false;
 
-	vector<std::shared_ptr<SplineSurface> > edges = volume->getBoundarySurfaces(true);
+	vector<SurfacePointer > edges = volume->getBoundarySurfaces(true);
 	for(int i=0; i<6; i++) {
 		walls.push_back( new SurfaceDisplay(edges[i]->clone()) );
 		walls[i]->setFaceIndex(i);
