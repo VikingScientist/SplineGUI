@@ -242,7 +242,7 @@ void keyClick(unsigned char key) {
 						if(curves[j][k].get() == c)  {
 							model.addLinePropertyCode(j, k, code);
 							int v1, v2;
-							Vertex::getVertexEnumeration(k, v1, v2);
+							Vertex::getVertexEnumerationOnVolume(k, v1, v2);
 							PointDisplay *pd = gui->getDisplayObject(points[j][v1].get());
 							pd->setColor(color.R, color.G, color.B);
 							pd = gui->getDisplayObject(points[j][v2].get());

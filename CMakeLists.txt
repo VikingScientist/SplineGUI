@@ -63,6 +63,9 @@ TARGET_LINK_LIBRARIES(SplineGUI ${DEPLIBS})
 ADD_EXECUTABLE(SplineGUIApp src/main.cpp)
 TARGET_LINK_LIBRARIES(SplineGUIApp SplineGUI ${DEPLIBS})
 
+ADD_EXECUTABLE(bndryCodeGUI src/main_setBndryCodes.cpp)
+TARGET_LINK_LIBRARIES(bndryCodeGUI SplineGUI ${DEPLIBS})
+
 ADD_EXECUTABLE(refineGUI src/main_refine_gui.cpp)
 TARGET_LINK_LIBRARIES(refineGUI SplineGUI ${DEPLIBS})
 

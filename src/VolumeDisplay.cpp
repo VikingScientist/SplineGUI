@@ -8,18 +8,19 @@ using namespace Go;
 using namespace std;
 
 VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
-	this->volume = volume;
-	positions      = NULL;
-	normals        = NULL;
-	triangle_strip = NULL;
-	param_values   = NULL;
-	wallbuffer     = NULL;
-	cp_pos         = NULL;
-	cp_lines       = NULL;
-	resolution[0]  = 0;
-	resolution[1]  = 0;
-	resolution[2]  = 0;
-	draw_contol_mesh = false;
+	this->volume           = volume;
+	positions              = NULL;
+	normals                = NULL;
+	triangle_strip         = NULL;
+	param_values           = NULL;
+	wallbuffer             = NULL;
+	cp_pos                 = NULL;
+	cp_lines               = NULL;
+	resolution[0]          = 0;
+	resolution[1]          = 0;
+	resolution[2]          = 0;
+	draw_contol_mesh       = false;
+	colorByParametervalues = false;
 
 	vector<SurfacePointer > edges = volume->getBoundarySurfaces(true);
 	for(int i=0; i<6; i++) {
@@ -234,6 +235,12 @@ void VolumeDisplay::print(ostream *out) {
 
 void VolumeDisplay::setDrawControlMesh(bool draw) {
 	draw_contol_mesh = draw;
+}
+
+void VolumeDisplay::setColorByParameterValues(bool draw) {
+	colorByParametervalues = draw;
+	for(int i=0; i<6; i++)
+		walls[i]->setColorByParameterValues(draw);
 }
 
 void VolumeDisplay::initMouseMasks() {

@@ -30,6 +30,8 @@ class SurfaceDisplay : public DisplayObject {
 		DISPLAY_CLASS_TYPE classType() { return SURFACE; }
 		void printDebugInfo();
 		void print(std::ostream *out);
+		void setDrawControlMesh(bool draw);
+		void setColorByParameterValues(bool draw);
 
 		void initMouseMasks() ;
 		void setMaskPos(int x, int y, bool value) ;
@@ -37,18 +39,23 @@ class SurfaceDisplay : public DisplayObject {
 	
 	private:
 
+		bool draw_contol_mesh;
+		bool colorByParametervalues;
 		int resolution[2];
 		int triangle_count;
 		int width;
 		int height;
 		int faceIndex;
+		int line_count; // for control polygon
+		int cp_count;
+		GLdouble *cp_pos;
+		GLuint   *cp_lines;
 		GLdouble *positions;
 		GLdouble *normals;
 		GLdouble *param_values;
-		GLuint *triangle_strip;
-		GLfloat *xi_buffer;
-		GLfloat *eta_buffer;
-		bool selected;
+		GLuint   *triangle_strip;
+		GLfloat  *xi_buffer;
+		GLfloat  *eta_buffer;
 		std::vector<CurveDisplay*> knot_lines;
 
 		void myGridEvaluator(int n1, int n2, std::vector<double>& pts, std::vector<double>& nor, std::vector<double>& par_u, std::vector<double>& par_v);

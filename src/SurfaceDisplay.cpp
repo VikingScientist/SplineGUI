@@ -8,17 +8,20 @@ using namespace Go;
 using namespace std;
 
 SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
-	this->surf = surf;
-	positions      = NULL;
-	normals        = NULL;
-	triangle_strip = NULL;
-	param_values   = NULL;
-	xi_buffer      = NULL;
-	eta_buffer     = NULL;
-	resolution[0]  = 0;
-	resolution[1]  = 0;
-	selected       = false;
-	faceIndex      = -1;
+	this->surf             = surf;
+	positions              = NULL;
+	normals                = NULL;
+	triangle_strip         = NULL;
+	param_values           = NULL;
+	xi_buffer              = NULL;
+	eta_buffer             = NULL;
+	cp_pos                 = NULL;
+	cp_lines               = NULL;
+	resolution[0]          = 0;
+	resolution[1]          = 0;
+	draw_contol_mesh       = false;
+	colorByParametervalues = false;
+	faceIndex              = -1;
 	setColor(.8, .4, .05); // orange
 	// setColor(.6, .6, .6); // light gray
 
@@ -51,6 +54,8 @@ SurfaceDisplay::~SurfaceDisplay() {
 	if(param_values)   delete[] param_values;
 	if(xi_buffer)      delete[] xi_buffer;
 	if(eta_buffer)     delete[] eta_buffer;
+	if(cp_pos)         delete[] cp_pos;
+	if(cp_lines)       delete[] cp_lines;
 }
 
 void SurfaceDisplay::setFaceIndex(int i) {
@@ -62,6 +67,9 @@ void SurfaceDisplay::tesselate(int *n) {
 	if(normals)        delete[] normals;
 	if(triangle_strip) delete[] triangle_strip;
 	if(param_values)   delete[] param_values;
+	if(cp_pos)         delete[] cp_pos;
+	if(cp_lines)       delete[] cp_lines;
+
 	int dim = surf->dimension();
 
 	double p_u_min = surf->startparam_u();
@@ -73,6 +81,7 @@ void SurfaceDisplay::tesselate(int *n) {
 	vector<double> param_u;
 	vector<double> param_v;
 
+	// if no tesselation resolution is given, take an educated guess
 	if(n==NULL) {
 		vector<double> uniqueKnots_u, uniqueKnots_v;
 		int pu = surf->order_u();
@@ -80,44 +89,33 @@ void SurfaceDisplay::tesselate(int *n) {
 		surf->basis_u().knotsSimple(uniqueKnots_u);
 		surf->basis_v().knotsSimple(uniqueKnots_v);
 		n = new int[2];
-		/*
-		n[0] = (pu-1)*3;
-		n[1] = (pv-1)*3;
-		for(uint i=0; i<uniqueKnots_u.size()-1; i++)
-			for(int j=0; j<n[0]; j++)
-				param_u.push_back( uniqueKnots_u[i] + j*(uniqueKnots_u[i+1]-uniqueKnots_u[i])/(n[0]) );
-		param_u.push_back(uniqueKnots_u.back());
-		for(uint i=0; i<uniqueKnots_v.size()-1; i++)
-			for(int j=0; j<n[1]; j++)
-				param_v.push_back( uniqueKnots_v[i] + j*(uniqueKnots_v[i+1]-uniqueKnots_v[i])/(n[1]) );
-		param_v.push_back(uniqueKnots_v.back());
-		surf->gridEvaluator(pts, param_u, param_v);
-		for(uint j=0; j<param_v.size(); j++) {
-			for(uint i=0; i<param_u.size(); i++) {
-				Point oneNormal;
-				surf->normal(oneNormal, param_u[i], param_v[j]);
-				normals_evaluated.push_back(oneNormal[0]);
-				normals_evaluated.push_back(oneNormal[1]);
-				normals_evaluated.push_back(oneNormal[2]);
-			}
-		}
-		n[0] = param_u.size();
-		n[1] = param_v.size();
-	} else {
-		surf->gridEvaluator(n[0], n[1], pts, normals_evaluated, param_u, param_v, false);
-	}
-	*/
 		n[0] = (uniqueKnots_u.size()-1)*(pu-1)*3;
 		n[1] = (uniqueKnots_v.size()-1)*(pv-1)*3;
 	}
+
+	// evaluate the surface parameters coordinates
 	surf->gridEvaluator(n[0], n[1], pts, normals_evaluated, param_u, param_v, false);
+
+	// store the number of the different primitives
+	int nCoef[2];
 	resolution[0]  = n[0];
 	resolution[1]  = n[1];
 	triangle_count = (n[0]*2+2)*(n[1]-1);
+	nCoef[0]       = surf->numCoefs_u();
+	nCoef[1]       = surf->numCoefs_v();
+	cp_count       = nCoef[0]*nCoef[1];
+	line_count     = (nCoef[0]-1)*nCoef[1] + nCoef[0]*(nCoef[1]-1);
+	line_count    *= 2; // two indices for each line-piece
+
+	// allocate memory
 	triangle_strip = new GLuint[triangle_count];
 	positions      = new GLdouble[n[0]*n[1]*dim];
 	normals        = new GLdouble[n[0]*n[1]*dim];
 	param_values   = new GLdouble[n[0]*n[1]*3];
+	cp_pos         = new GLdouble[cp_count*3];
+	cp_lines       = new GLuint[line_count];
+
+	// store the parametrization (i.e. (u,v,w)-coordinates which maps to the (x,y,z)-coordinates)
 	int k=0;
 	for(int j=0; j<n[1]; j++) {
 		for(int i=0; i<n[0]; i++) {
@@ -152,6 +150,8 @@ void SurfaceDisplay::tesselate(int *n) {
 			}
 		}
 	}
+
+	// store the actual geometric data points
 	k = 0;
 	for(int j=0; j<n[1]; j++) {
 		for(int i=0; i<n[0]; i++) {
@@ -162,6 +162,8 @@ void SurfaceDisplay::tesselate(int *n) {
 			}
 		}
 	}
+
+	// construct the triangulation
 	k = 0;
 	for(int j=0; j<n[1]-1; j++) {
 		for(int i=0; i<n[0]; i++) {
@@ -171,38 +173,87 @@ void SurfaceDisplay::tesselate(int *n) {
 		triangle_strip[k++] = (j+2)*n[0] - 1;
 		triangle_strip[k++] = (j+1)*n[0];
 	}
+
+	// store the control points in case we want to see the control mesh
+	vector<double>::iterator cp;
+	if(surf->rational()) {
+		cp = surf->rcoefs_begin();
+		int i=0;
+		while(cp != surf->rcoefs_end() ) {
+			cp_pos[i  ] = *cp++;
+			cp_pos[i+1] = *cp++;
+			cp_pos[i+2] = *cp++;
+			// goTools store CP premultiplied by weight
+			// here we divide this away
+			cp_pos[i++] /= *cp; 
+			cp_pos[i++] /= *cp;
+			cp_pos[i++] /= *cp;
+			cp++;
+		}
+	} else {
+		cp = surf->coefs_begin();
+		int i = 0;
+		while(cp != surf->coefs_end() )
+			cp_pos[i++] = *cp++;
+	}
+	int c = 0;
+	for(int j=0; j<nCoef[1]; j++) {
+		for(int i=0; i<nCoef[0]-1; i++) {
+			cp_lines[c++] = j*nCoef[0] + i;
+			cp_lines[c++] = j*nCoef[0] + i+1;
+		}
+	}
+	for(int j=0; j<nCoef[1]-1; j++) {
+		for(int i=0; i<nCoef[0]; i++) {
+			cp_lines[c++] =   j  *nCoef[0] + i;
+			cp_lines[c++] = (j+1)*nCoef[0] + i;
+		}
+	}
 	
+	// tesselate all knot lines owned by this surface
 	for(uint i=0; i<knot_lines.size(); i++)
 		knot_lines[i]->tesselate();
 
 }
 
 void SurfaceDisplay::paint() {
-	glEnable(GL_LIGHTING);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glColor3f(color[0], color[1], color[2]);
-	glVertexPointer(3, GL_DOUBLE, 0, positions);
-	glNormalPointer(GL_DOUBLE, 0, normals);
-	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisable(GL_LIGHTING);
-
-	for(uint i=0; i<knot_lines.size(); i++)
-		knot_lines[i]->paint();
+	if(draw_contol_mesh) {
+		glColor3f(0,0,0);
+		glLineWidth(2);
+		glPointSize(6);
+		glVertexPointer(3, GL_DOUBLE, 0, cp_pos);
+		glDrawElements(GL_LINES, line_count, GL_UNSIGNED_INT, cp_lines);
+		glDrawArrays(GL_POINTS, 0, cp_count);
+	} else {
+		glEnable(GL_LIGHTING);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glColor3f(color[0], color[1], color[2]);
+		glVertexPointer(3, GL_DOUBLE, 0, positions);
+		glNormalPointer(GL_DOUBLE, 0, normals);
+		glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisable(GL_LIGHTING);
+	
+		for(uint i=0; i<knot_lines.size(); i++)
+			knot_lines[i]->paint();
+	}
 }
 
 void SurfaceDisplay::paintSelected() {
 	glEnable(GL_LIGHTING);
 	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	// glEnableClientState(GL_COLOR_ARRAY);
-	// glColorPointer(3, GL_DOUBLE, 0, param_values);
+	if(colorByParametervalues) {
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(3, GL_DOUBLE, 0, param_values);
+	}
 	glVertexPointer(3, GL_DOUBLE, 0, positions);
 	glNormalPointer(GL_DOUBLE, 0, normals);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
-	// glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisable(GL_LIGHTING);
+	if(colorByParametervalues)
+		glDisableClientState(GL_COLOR_ARRAY);
 
 	for(uint i=0; i<knot_lines.size(); i++)
 		knot_lines[i]->paint();
@@ -242,14 +293,16 @@ double* SurfaceDisplay::parValueAtPosition(int x, int y) {
 	return ans;
 }
 
+void SurfaceDisplay::setDrawControlMesh(bool draw) {
+	draw_contol_mesh = draw;
+}
+
+void SurfaceDisplay::setColorByParameterValues(bool draw) {
+	colorByParametervalues = draw;
+}
+
 
 void SurfaceDisplay::processMouse(int button, int state, int x, int y) {
-	
-	/*
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && xi_buffer[y*width+x] > 0.0) {
-		selected = !selected;
-	}
-	*/
 }
 
 void SurfaceDisplay::processMouseActiveMotion(int x, int y) {

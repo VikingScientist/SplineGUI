@@ -8,6 +8,7 @@
  *************************************************************************************/
  
 #include "SplineGUI.h"
+#include "DisplayObjectSet.h"
 #include "Button.h"
 #include <iostream>
 
@@ -19,6 +20,11 @@ int main(int argc, char** argv) {
 	SplineGUI *gui = SplineGUI::getInstance();
 	for(int argi=1; argi<argc; argi++)
 		gui->addFile(argv[argi]);
+
+	// could actually type gui->show() here and be done with it
+	// but we'll add some usability by adding parametric coloring
+	gui->getObjectSet()->colorSelectedByParameterValues(true);
+	
 	gui->show();
 
 	return 0;
