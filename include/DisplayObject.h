@@ -48,6 +48,7 @@ class DisplayObject : public MouseListener, ActiveObject {
 		virtual void printDebugInfo() { }
 		virtual void print(std::ostream *out) { }
 		virtual void setDrawControlMesh(bool draw) { }
+		virtual void setColorByParameterValues(bool show_color) { }
 		virtual void setActionListener(void (*actionPerformed)(ActiveObject*, int )) { ActiveObject::setActionListener(actionPerformed); }
 
 		// trying diffent things with the mouse-masks

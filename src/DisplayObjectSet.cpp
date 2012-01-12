@@ -12,14 +12,14 @@ DisplayObjectSet::DisplayObjectSet() {
 	left_mouse_held       = false;
 	hasNewObjects         = false;
 	control_mesh          = false;
-	parametric            = false;
+	no_control_mesh       = false;
 	startX                = -1;
 	startY                = -1;
 	drawX                 = -1;
 	drawY                 = -1;
-	default_resolution[0] = 40;
-	default_resolution[1] = 40;
-	default_resolution[2] = 40;
+	default_resolution[0] = 41;
+	default_resolution[1] = 41;
+	default_resolution[2] = 41;
 	wallbuffer            = NULL;
 }
 
@@ -322,13 +322,22 @@ DisplayObject* DisplayObjectSet::getSelected(DISPLAY_CLASS_TYPE classType) {
 	return NULL;
 }
 */
-void DisplayObjectSet::changeParametric() {
-	parametric = !parametric;
+
+void DisplayObjectSet::enableControlMesh(bool enabled) {
+	no_control_mesh = !enabled;
 }
+
 void DisplayObjectSet::changeControlMesh() {
+	if(no_control_mesh)
+		return;
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
 		(*obj)->setDrawControlMesh(!control_mesh);
 	control_mesh = !control_mesh;
+}
+
+void DisplayObjectSet::colorSelectedByParameterValues(bool show_color) {
+	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
+		(*obj)->setColorByParameterValues(show_color);
 }
 
 vector<DisplayObject*>::iterator DisplayObjectSet::objects_begin() {

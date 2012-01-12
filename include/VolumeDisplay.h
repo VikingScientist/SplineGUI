@@ -30,7 +30,7 @@ class VolumeDisplay : public DisplayObject {
 		DISPLAY_CLASS_TYPE classType() { return VOLUME; }
 		void printDebugInfo();
 		void print(std::ostream *out);
-		void setDrawControlMesh(bool draw);
+		void setDrawControlMesh(bool draw); void setColorByParameterValues(bool draw);
 		void setSelectedColor(double r, double g, double b);
 		void setColor(double r, double g, double b);
 
@@ -41,6 +41,7 @@ class VolumeDisplay : public DisplayObject {
 	private:
 
 		bool draw_contol_mesh;
+		bool colorByParametervalues;
 		int resolution[3];
 		int triangle_count;
 		int line_count;
@@ -48,12 +49,12 @@ class VolumeDisplay : public DisplayObject {
 		int width;
 		int height;
 		GLdouble *cp_pos;
-		GLuint *cp_lines;
+		GLuint   *cp_lines;
 		GLdouble *positions;
 		GLdouble *normals;
 		GLdouble *param_values;
-		GLuint *triangle_strip;
-		GLfloat *wallbuffer;
+		GLuint   *triangle_strip;
+		GLfloat  *wallbuffer;
 		std::vector<SurfaceDisplay*> walls;
 };
 

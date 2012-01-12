@@ -68,7 +68,6 @@ class SplineGUI {
 		int next_button_y;
 
 	public:
-
 		// data management
 		DisplayObjectSet *getObjectSet();
 		void addFile(const char *filename);

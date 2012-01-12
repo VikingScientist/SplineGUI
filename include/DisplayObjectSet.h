@@ -31,7 +31,9 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void processMouseActiveMotion(int x, int y);
 		void processMousePassiveMotion(int x, int y);
 		void setOnlySelectable(DISPLAY_CLASS_TYPE classType);
+		void enableControlMesh(bool enabled);
 		void changeControlMesh();
+		void colorSelectedByParameterValues(bool show_color);
 		void changeParametric();
 		void setActionListener(void (*actionPerformed)(ActiveObject*, int )) ;
 		void setColor(DISPLAY_CLASS_TYPE type, float r, float g, float b);
@@ -58,9 +60,9 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		std::vector<DisplayObject*> hidden;
 		DISPLAY_CLASS_TYPE classType;
 		int default_resolution[3];
+		bool no_control_mesh;
 		bool control_mesh;
 		bool left_mouse_held;
-		bool parametric;
 		int startX, startY;
 		int drawX, drawY;
 		GLfloat *wallbuffer;
