@@ -336,10 +336,10 @@ int main(int argc, char **argv) {
 		for(uint i=0; i<surfPatches.size(); i++) {
 			Go::RectDomain pSpan = surfPatches[i]->parameterDomain();
 			// add edges
-			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(0)));
-			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(2)));
 			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(3)));
 			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(1)));
+			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(0)));
+			curves[i].push_back(shared_ptr<Go::SplineCurve>(surfPatches[i]->edgeCurve(2)));
 
 			// add corners
 			for(int v=0; v<2; v++) {
