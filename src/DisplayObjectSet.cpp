@@ -42,6 +42,12 @@ void DisplayObjectSet::setActionListener(void (*actionPerformed)(ActiveObject*, 
 		(*obj)->setActionListener(actionPerformed);
 }
 
+void DisplayObjectSet::paintMetaInfoBox(int x, int y) {
+	int obj_i = objectAtPosition(x,y);
+	if(obj_i<objects.size())
+		objects[obj_i]->paintMeta(x, y);
+}
+
 void DisplayObjectSet::paintSelectionBox() {
 	if(!left_mouse_held)
 		return;
@@ -431,6 +437,12 @@ VolumeDisplay* DisplayObjectSet::getDisplayObject(Go::SplineVolume *v) {
 		}
 	}
 	return NULL;
+}
+
+DisplayObject* DisplayObjectSet::getObjectAt(int x, int y) {
+	int i = objectAtPosition(x,y);
+	if(i<objects.size())
+		return objects[i];
 }
 
 void DisplayObjectSet::setLineWidth(int width) {

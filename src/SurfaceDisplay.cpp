@@ -7,7 +7,7 @@
 using namespace Go;
 using namespace std;
 
-SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) {
+SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) : DisplayObject() {
 	this->surf             = surf;
 	positions              = NULL;
 	normals                = NULL;

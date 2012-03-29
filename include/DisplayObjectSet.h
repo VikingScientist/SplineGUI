@@ -18,6 +18,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		DisplayObjectSet();
 		void tesselateAll();
 		void tesselateAll(int *n);
+		void paintMetaInfoBox(int x, int y);
 		void paintSelectionBox();
 		void paintAll();
 		void paintAllMouseAreas(std::vector<MVPHandler*> viewpanels);
@@ -45,10 +46,12 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		std::vector<DisplayObject*>::iterator objects_begin();
 		std::vector<DisplayObject*>::iterator objects_end();
 
-		PointDisplay* getDisplayObject(Go::Point *p);
-		CurveDisplay* getDisplayObject(Go::SplineCurve *c);
+		PointDisplay*   getDisplayObject(Go::Point *p);
+		CurveDisplay*   getDisplayObject(Go::SplineCurve *c);
 		SurfaceDisplay* getDisplayObject(Go::SplineSurface *s);
-		VolumeDisplay* getDisplayObject(Go::SplineVolume *v);
+		VolumeDisplay*  getDisplayObject(Go::SplineVolume *v);
+
+		DisplayObject*  getObjectAt(int x, int y);
 
 		bool hasNewObjects;
 

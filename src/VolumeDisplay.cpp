@@ -7,7 +7,7 @@
 using namespace Go;
 using namespace std;
 
-VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
+VolumeDisplay::VolumeDisplay(SplineVolume *volume) : DisplayObject() {
 	this->volume           = volume;
 	positions              = NULL;
 	normals                = NULL;
@@ -42,6 +42,7 @@ VolumeDisplay::VolumeDisplay(SplineVolume *volume) {
 	walls[1]->surf->reverseParameterDirection(true);
 	walls[2]->surf->reverseParameterDirection(true);
 	walls[5]->surf->reverseParameterDirection(true);
+
 }
 
 VolumeDisplay::~VolumeDisplay() {

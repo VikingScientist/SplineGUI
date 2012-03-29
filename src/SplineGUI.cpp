@@ -33,6 +33,9 @@
 #include "OrthoProjection.h"
 #include "Button.h"
 #include "SplineGUI.h"
+
+#include <sys/time.h>
+
 typedef unsigned int uint;
 
 using namespace std;
@@ -49,6 +52,14 @@ string fileUsage = "  splineGUI <inputFile> \n";
 int window_width  = 1000;
 int window_height = 700;
 int window_border = 10;
+
+// to detect mouse hover events
+int last_mouse_x;
+int last_mouse_y;
+struct timeval last_mouse_move;
+int hover_threadshold = 1000; // in milliseconds
+bool does_hover       = false;
+
 
 Camera cam(480, 480, 200, 200);
 OrthoProjection top_view(TOP);
@@ -106,6 +117,8 @@ void drawScene() {
 	objectSet.paintSelectionBox();
 	for(vector<Button*>::size_type i=0; i<buttons.size(); i++)
 		buttons[i]->paint();
+	if(does_hover)
+		objectSet.paintMetaInfoBox(last_mouse_x, last_mouse_y);
 
 	glutSwapBuffers();
 	if(objectSet.hasNewObjects) {
@@ -143,13 +156,17 @@ void readFile(const char *filename) {
 		cerr << "Error reading input file \"" << filename << "\"" << endl;
 		exit(1);
 	}
+	int patchCount = 0;
 	while(!inFile.eof()) {
+		char *patchName = new char[256];
+		sprintf(patchName, "Patch %d", patchCount++);
 		head.read(inFile);
 		switch(head.classType()) {
 			case Class_SplineCurve: {
 				SplineCurve *c = new SplineCurve();
 				c->read(inFile);
 				CurveDisplay *obj = new CurveDisplay(c);
+				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
 				cout << "SplineCurve succesfully read" << endl;
 				break;
@@ -158,6 +175,7 @@ void readFile(const char *filename) {
 				SplineSurface *s = new SplineSurface();
 				s->read(inFile);
 				SurfaceDisplay *obj = new SurfaceDisplay(s);
+				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
 				cout << "SplineSurface succesfully read" << endl;
 				break;
@@ -166,6 +184,7 @@ void readFile(const char *filename) {
 				SplineVolume *v = new SplineVolume();
 				v->read(inFile);
 				VolumeDisplay *obj = new VolumeDisplay(v);
+				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
 				cout << "SplineVolume succesfully read" << endl;
 				break;
@@ -200,6 +219,7 @@ void readFile(const char *filename) {
 		}
 		ws(inFile); // eat whitespaces
 	}
+
 	inFile.close();
 }
 
@@ -207,6 +227,9 @@ void handleKeypress(unsigned char key, int x, int y) {
 	if(key == 'c') {
 		objectSet.changeControlMesh();
 		objectSet.removeSelected();
+		glutPostRedisplay();
+	} else if(key == 'h') {
+		does_hover = true;
 		glutPostRedisplay();
 	} else if(key == 32) { // space-key
 		if(view_panels.size() == 1) {
@@ -267,6 +290,13 @@ void processMouse(int button, int state, int x, int y) {
 
 void processMouseActiveMotion(int x, int y) {
 	y = window_height - y; // define (x,y) origin to be in the lower left. Much easier since this is how GL works with these things
+	gettimeofday(&last_mouse_move, NULL);
+	last_mouse_x = x;
+	last_mouse_y = y;
+	if(does_hover) {
+		does_hover   = false;
+		glutPostRedisplay();
+	}
 	for(vector<MouseListener*>::size_type i=0; i<mouse_listeners.size(); i++) {
 		MouseListener* l = mouse_listeners[i];
 		if(l->isCatchingAll() || l->isContained(x,y)) {
@@ -289,6 +319,13 @@ void processMouseActiveMotion(int x, int y) {
 
 void processMousePassiveMotion(int x, int y) {
 	y = window_height - y; // define (x,y) to be in the lower left. Much easier since this is how GL works with these things
+	gettimeofday(&last_mouse_move, NULL);
+	last_mouse_x = x;
+	last_mouse_y = y;
+	if(does_hover) {
+		does_hover   = false;
+		glutPostRedisplay();
+	}
 	for(vector<MouseListener*>::size_type i=0; i<mouse_listeners.size(); i++) {
 		MouseListener* l = mouse_listeners[i];
 		if(l->isCatchingAll() || l->isContained(x,y)) {
@@ -330,6 +367,21 @@ void *start(void *arg) {
 }
 */
 
+void hoverTest() {
+	timeval time_now;
+	long mtime, seconds, useconds;
+
+	gettimeofday(&time_now, NULL);
+	seconds  = time_now.tv_sec  - last_mouse_move.tv_sec;
+	useconds = time_now.tv_usec - last_mouse_move.tv_usec;
+	mtime = ((seconds)*1000 + useconds/1000.0);
+
+	if(mtime > hover_threadshold) {
+		does_hover = true;
+		glutPostRedisplay();
+	}
+}
+
 } // namespace Workaround_namespace
 
 
@@ -353,6 +405,8 @@ SplineGUI::SplineGUI() {
 	glutMotionFunc(processMouseActiveMotion);
 	glutPassiveMotionFunc(processMousePassiveMotion);
 	glutReshapeFunc(handleResize);
+
+	glutIdleFunc(hoverTest);
 	
 	// setup view_panels interaction
 	view_panels.push_back(&front_view);
@@ -367,6 +421,9 @@ SplineGUI::SplineGUI() {
 	// setup DisplayObject interaction (curves, surfaces etc)
 	addMouseListener(&objectSet);
 	((ActiveObject*) &objectSet)->setActionListener(actionListener);
+
+	// set hover start timing 
+	gettimeofday(&last_mouse_move, NULL);
 
 }
 
