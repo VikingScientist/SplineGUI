@@ -50,6 +50,7 @@ namespace Workaround_namespace {
 	void processMouseActiveMotion(int x, int y);
 	void processMousePassiveMotion(int x, int y);
 	void initRendering();
+	void hoverTest();
 }
 
 /** 
@@ -66,7 +67,7 @@ class SplineGUI {
 
 		int next_button_x;
 		int next_button_y;
-
+		
 	public:
 		// data management
 		DisplayObjectSet *getObjectSet();
