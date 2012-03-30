@@ -157,6 +157,9 @@ void DisplayObjectSet::paintAllMouseAreas(vector<MVPHandler*> viewpanels) {
 
 int DisplayObjectSet::objectAtPosition(int x, int y) {
 	int width  = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
+	if(x<=0 || y<=0 || x>width || y>height)
+		return -1;
 	int k = (width*y+x)*3;
 	int i;
 	GLfloat r,g,b;
@@ -441,7 +444,7 @@ VolumeDisplay* DisplayObjectSet::getDisplayObject(Go::SplineVolume *v) {
 
 DisplayObject* DisplayObjectSet::getObjectAt(int x, int y) {
 	int i = objectAtPosition(x,y);
-	if(i<objects.size())
+	if(i >=0 && i<objects.size())
 		return objects[i];
 }
 
