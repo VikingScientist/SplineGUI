@@ -597,6 +597,7 @@ void SplineGUI::addTextField(TextField *tf) {
 }
 
 void SplineGUI::removeTextField(TextField *tf) {
+	next_button_x -= tf->getWidth() - 10;
 	removeMouseListener(tf);
 	removeKeyboardClassListener((KeyListener*)tf);
 	for(uint i=0; i<textFields.size(); i++) {
