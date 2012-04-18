@@ -279,9 +279,6 @@ void readPropertyCodesFromStdin() {
 		DISPLAY_CLASS_TYPE type;
 		cin >> patch;
 		cin >> primitive;
-		cout << "Code = \"" << code << "\"\n";
-		cout << "Patch = " << patch << endl;
-		cout << "Primitive = " << primitive << endl;
 		for(iCode=0; iCode<boundaryTags.size(); iCode++)
 			if(strcmp(boundaryTags[iCode],code) == 0)
 				break;
@@ -289,26 +286,21 @@ void readPropertyCodesFromStdin() {
 			boundaryTags.push_back(code);
 		if(primitive == 0) {
 			cin >> locIndex;
-			cout << "LocIndex = " << locIndex << endl;
 			model.addVertexPropertyCode(patch, locIndex, code);
 			type = POINT;
 		} else if(primitive == 1) {
 			cin >> locIndex;
-			cout << "LocIndex = " << locIndex << endl;
 			model.addLinePropertyCode(patch, locIndex, code, false);
 			type = CURVE;
 		} else if(primitive == 2) {
 			if(model.isVolumetricModel())
 				cin >> locIndex;
-			cout << "LocIndex = " << locIndex << endl;
 			model.addFacePropertyCode(patch, locIndex, code, false);
 			type = SURFACE;
 		} else if(primitive == 3) {
 			model.addVolumePropertyCode(patch, code, false);
-			cout << "LocIndex = " << locIndex << endl;
 			type = VOLUME;
 		}
-		cout << "iCode = " << iCode << endl;
 		colorPrimitive(patch, type, locIndex, iCode, code);
 		ws(cin); // eat whitespace
 		code = new char[1024];
