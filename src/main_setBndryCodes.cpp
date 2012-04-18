@@ -2,7 +2,7 @@
  * \file main_setBndryCodes.cpp
  *
  * \author Kjetil A. Johannessen
- * \date January 2012
+ * \date January-March 2012
  *
  * \brief spline GUI for GPM-interaction
  *************************************************************************************/
@@ -18,6 +18,7 @@
 #include "CurveDisplay.h"
 #include "PointDisplay.h"
 #include "Button.h"
+#include "TextField.h"
 
 #include <GPM/SplineModel.h>
 #include <GPM/TopologySet.h>
@@ -87,6 +88,10 @@ vector<vector<shared_ptr<Go::SplineSurface> > > surfaces;
 vector<vector<shared_ptr<Go::SplineCurve> > >   curves;
 vector<vector<shared_ptr<Go::Point> > >         points;
 
+TextField*            textInput;
+vector<const char*>   boundaryTags;
+bool isEnteringTag    = false;
+
 Button *showVolumes   = new Button("Volumes");
 Button *showFaces     = new Button("Faces");
 Button *showLines     = new Button("Lines");
@@ -107,81 +112,103 @@ void processParameters(int argc, char** argv) {
 }
 
 void keyClick(unsigned char key) {
-	if('0' <= key && key <= '9') {
-		SplineGUI *gui = SplineGUI::getInstance();
-		vector<DisplayObject*> selected = gui->getSelectedObjects();
-		int code = key - '0';
-		HSVType col_hsv;
-		col_hsv.H = 6.*((3*code)%10)/9;
-		col_hsv.V = 0.7;
-		col_hsv.S = (code==0) ? 0.0 : 0.7;
-		RGBType color = HSV_to_RGB(col_hsv);
-		for(uint i=0; i<selected.size(); i++) {
-			// cout << "setting code #" << code << "(" << color.R << ", " << color.G << ", " << color.B << ")\n";
-			selected[i]->setColor(color.R,color.G,color.B);
-			if(selected[i]->classType() == VOLUME) {
-				Go::SplineVolume *v = ((VolumeDisplay*)selected[i])->volume;
-				for(uint j=0; j<volumes.size(); j++)
-					if(volumes[j].get() == v) 
-						model.addVolumePropertyCode(j, code);
+	SplineGUI *gui = SplineGUI::getInstance();
+	if(key == 13) { // enter key
+		if(isEnteringTag) {
+			string text =  textInput->getText().c_str();
+			char* code = new char[text.length()+1];
+			copy(text.begin(), text.end(), code);
+			code[text.length()] = 0;  // zero-terminating the string
+			
+			vector<DisplayObject*> selected = gui->getSelectedObjects();
+			int iCode ;
+			for(iCode=0; iCode<boundaryTags.size(); iCode++)
+				if(strcmp(boundaryTags[iCode],code) == 0)
+					break;
+			if(code[0] == 0) // empty string ressets to homogenuous neumann
+				iCode = 0;
+			else if(iCode++ == boundaryTags.size())
+				boundaryTags.push_back(code);
 
-			} else if(selected[i]->classType() == SURFACE) {
-				Go::SplineSurface *s = ((SurfaceDisplay*)selected[i])->surf;
-				bool setOnce = false;
-				for(uint j=0; j<surfaces.size() && !setOnce; j++) {
-					for(uint k=0; k<surfaces[j].size(); k++) {
-						if(surfaces[j][k].get() == s)  {
-							if(showLines->isSelected()) {
-								model.addFacePropertyCode(j, k, code); // this sets all internal codes
-								// inclusive endpoints, so we need to colorize edges & vertices as well
-								vector<int> edgeLines = Line::getLineEnumeration(k);
-								vector<int> edgePoint = Vertex::getVertexEnumeration(k);
-								for(int ii=0; ii<4; ii++) {
-									CurveDisplay *cd = gui->getDisplayObject(curves[j][edgeLines[ii]].get());
-									PointDisplay *pd = gui->getDisplayObject(points[j][edgePoint[ii]].get());
-									if(cd) cd->setColor(color.R, color.G, color.B);
-									pd->setColor(color.R, color.G, color.B);
+			HSVType col_hsv;
+			col_hsv.H = 6.*((3*iCode)%10)/9;
+			col_hsv.V = 0.7;
+			col_hsv.S = (iCode==0) ? 0.0 : 0.7;
+			RGBType color = HSV_to_RGB(col_hsv);
+			for(uint i=0; i<selected.size(); i++) {
+				// cout << "setting iCode #" << iCode << "(" << color.R << ", " << color.G << ", " << color.B << ")\n";
+				selected[i]->setColor(color.R,color.G,color.B);
+				selected[i]->setMeta(code);
+				if(selected[i]->classType() == VOLUME) {
+					Go::SplineVolume *v = ((VolumeDisplay*)selected[i])->volume;
+					for(uint j=0; j<volumes.size(); j++)
+						if(volumes[j].get() == v) 
+							model.addVolumePropertyCode(j, code);
+
+				} else if(selected[i]->classType() == SURFACE) {
+					Go::SplineSurface *s = ((SurfaceDisplay*)selected[i])->surf;
+					bool setOnce = false;
+					for(uint j=0; j<surfaces.size() && !setOnce; j++) {
+						for(uint k=0; k<surfaces[j].size(); k++) {
+							if(surfaces[j][k].get() == s)  {
+								if(showLines->isSelected()) {
+									model.addFacePropertyCode(j, k, code); // this sets all internal codes
+									// inclusive endpoints, so we need to colorize edges & vertices as well
+									vector<int> edgeLines = Line::getLineEnumeration(k);
+									vector<int> edgePoint = Vertex::getVertexEnumeration(k);
+									for(int ii=0; ii<4; ii++) {
+										CurveDisplay *cd = gui->getDisplayObject(curves[j][edgeLines[ii]].get());
+										PointDisplay *pd = gui->getDisplayObject(points[j][edgePoint[ii]].get());
+										if(cd) cd->setColor(color.R, color.G, color.B);
+										pd->setColor(color.R, color.G, color.B);
+									}
+								} else {
+									model.addFacePropertyCode(j, k, code, false); // not include end lines/vertices
 								}
-							} else {
-								model.addFacePropertyCode(j, k, code, false); // not include end lines/vertices
-							}
-							setOnce = true;
-							break;
-						}
-					}
-				}
-
-			} else if(selected[i]->classType() == CURVE) {
-				Go::SplineCurve *c = ((CurveDisplay*)selected[i])->curve;
-				for(uint j=0; j<curves.size(); j++) {
-					for(uint k=0; k<curves[j].size(); k++) {
-						if(curves[j][k].get() == c)  {
-							if(showPoints->isSelected()) {
-								model.addLinePropertyCode(j, k, code);
-								int v1, v2;
-								if(model.isVolumetricModel())
-									Vertex::getVertexEnumerationOnVolume(k, v1, v2);
-								else 
-									Vertex::getVertexEnumerationOnFace(k, v1, v2);
-								PointDisplay *pd = gui->getDisplayObject(points[j][v1].get());
-								pd->setColor(color.R, color.G, color.B);
-								pd = gui->getDisplayObject(points[j][v2].get());
-								pd->setColor(color.R, color.G, color.B);
-							} else {
-								model.addLinePropertyCode(j, k, code, false);
+								setOnce = true;
+								break;
 							}
 						}
 					}
-				}
 
-			} else if(selected[i]->classType() == POINT) {
-				Go::Point p = ((PointDisplay*)selected[i])->point;
-				for(uint j=0; j<points.size(); j++)
-					for(uint k=0; k<points[j].size(); k++)
-						if(points[j][k]->dist(p) < 1e-4)
-							model.addVertexPropertyCode(j, k, code);
+				} else if(selected[i]->classType() == CURVE) {
+					Go::SplineCurve *c = ((CurveDisplay*)selected[i])->curve;
+					for(uint j=0; j<curves.size(); j++) {
+						for(uint k=0; k<curves[j].size(); k++) {
+							if(curves[j][k].get() == c)  {
+								if(showPoints->isSelected()) {
+									model.addLinePropertyCode(j, k, code);
+									int v1, v2;
+									if(model.isVolumetricModel())
+										Vertex::getVertexEnumerationOnVolume(k, v1, v2);
+									else 
+										Vertex::getVertexEnumerationOnFace(k, v1, v2);
+									PointDisplay *pd = gui->getDisplayObject(points[j][v1].get());
+									pd->setColor(color.R, color.G, color.B);
+									pd = gui->getDisplayObject(points[j][v2].get());
+									pd->setColor(color.R, color.G, color.B);
+								} else {
+									model.addLinePropertyCode(j, k, code, false);
+								}
+							}
+						}
+					}
+
+				} else if(selected[i]->classType() == POINT) {
+					Go::Point p = ((PointDisplay*)selected[i])->point;
+					for(uint j=0; j<points.size(); j++)
+						for(uint k=0; k<points[j].size(); k++)
+							if(points[j][k]->dist(p) < 1e-4)
+								model.addVertexPropertyCode(j, k, code);
+				}
 			}
+			gui->removeTextField(textInput);
+		} else {
+			textInput = new TextField(0,0,200,30);
+			gui->addTextField(textInput);
 		}
+		isEnteringTag = !isEnteringTag;
+		gui->enableControlKeys(!isEnteringTag);
 	}
 }
 
@@ -216,12 +243,12 @@ void ButtonClick(Button *caller) {
 	}
 }
 
-void colorPrimitive(int patch, DISPLAY_CLASS_TYPE type, int locIndex, int code) {
+void colorPrimitive(int patch, DISPLAY_CLASS_TYPE type, int locIndex, int iCode, const char* code) {
 	SplineGUI *gui = SplineGUI::getInstance();
 	HSVType col_hsv;
-	col_hsv.H = 6.*((3*code)%10)/9;
+	col_hsv.H = 6.*((3*iCode)%10)/9;
 	col_hsv.V = 0.7;
-	col_hsv.S = (code==0) ? 0.0 : 0.7;
+	col_hsv.S = (iCode==0) ? 0.0 : 0.7;
 	RGBType color = HSV_to_RGB(col_hsv);
 
 	DisplayObject *obj = NULL;
@@ -240,33 +267,51 @@ void colorPrimitive(int patch, DISPLAY_CLASS_TYPE type, int locIndex, int code) 
 		cerr << "Error parsing input stream: primitive not found\n" ;
 	} else {
 		obj->setColor(color.R,color.G,color.B);
+		obj->setMeta(code);
 	}
 }
 
 void readPropertyCodesFromStdin() {
-	int patch, primitive, locIndex, code;
-	while(cin >> code) {
+	int patch, primitive, locIndex;
+	int iCode = 0;
+	char *code = new char[1024];
+	while( cin.getline(code, 1024) ) {
 		DISPLAY_CLASS_TYPE type;
 		cin >> patch;
 		cin >> primitive;
+		cout << "Code = \"" << code << "\"\n";
+		cout << "Patch = " << patch << endl;
+		cout << "Primitive = " << primitive << endl;
+		for(iCode=0; iCode<boundaryTags.size(); iCode++)
+			if(strcmp(boundaryTags[iCode],code) == 0)
+				break;
+		if(iCode++ == boundaryTags.size())
+			boundaryTags.push_back(code);
 		if(primitive == 0) {
 			cin >> locIndex;
+			cout << "LocIndex = " << locIndex << endl;
 			model.addVertexPropertyCode(patch, locIndex, code);
 			type = POINT;
 		} else if(primitive == 1) {
 			cin >> locIndex;
+			cout << "LocIndex = " << locIndex << endl;
 			model.addLinePropertyCode(patch, locIndex, code, false);
 			type = CURVE;
 		} else if(primitive == 2) {
 			if(model.isVolumetricModel())
 				cin >> locIndex;
+			cout << "LocIndex = " << locIndex << endl;
 			model.addFacePropertyCode(patch, locIndex, code, false);
 			type = SURFACE;
 		} else if(primitive == 3) {
 			model.addVolumePropertyCode(patch, code, false);
+			cout << "LocIndex = " << locIndex << endl;
 			type = VOLUME;
 		}
-		colorPrimitive(patch, type, locIndex, code);
+		cout << "iCode = " << iCode << endl;
+		colorPrimitive(patch, type, locIndex, iCode, code);
+		ws(cin); // eat whitespace
+		code = new char[1024];
 	}
 }
 

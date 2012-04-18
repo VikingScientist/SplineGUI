@@ -120,14 +120,16 @@ void keyClick(unsigned char key) {
 	if('0' <= key && key <= '9') {
 		SplineGUI *gui = SplineGUI::getInstance();
 		vector<DisplayObject*> selected = gui->getSelectedObjects();
-		int code = key - '0';
+		int iCode = key - '0';
+		char* code = new char[1];
+		code[0] = key;
 		HSVType col_hsv;
-		col_hsv.H = 6.*((3*code)%10)/9;
+		col_hsv.H = 6.*((3*iCode)%10)/9;
 		col_hsv.V = 0.7;
-		col_hsv.S = (code==0) ? 0.0 : 0.7;
+		col_hsv.S = (iCode==0) ? 0.0 : 0.7;
 		RGBType color = HSV_to_RGB(col_hsv);
 		for(uint i=0; i<selected.size(); i++) {
-			// cout << "setting code #" << code << "(" << color.R << ", " << color.G << ", " << color.B << ")\n";
+			// cout << "setting iCode #" << iCode << "(" << color.R << ", " << color.G << ", " << color.B << ")\n";
 			selected[i]->setColor(color.R,color.G,color.B);
 			if(selected[i]->classType() == VOLUME) {
 				Go::SplineVolume *v = ((VolumeDisplay*)selected[i])->volume;
