@@ -32,6 +32,7 @@
 #include "VolumeDisplay.h"
 #include "OrthoProjection.h"
 #include "Button.h"
+#include "TextField.h"
 #include "SplineGUI.h"
 
 #include <sys/time.h>
@@ -69,12 +70,35 @@ vector<MVPHandler*> view_panels;
 
 DisplayObjectSet objectSet;
 vector<MouseListener*> mouse_listeners;
+vector<KeyListener*> key_class_listeners;
 vector<MouseListener*> selected_mouse_listeners;
 vector<Button*> buttons;
+vector<TextField*> textFields;
 
 void addMouseListener(MouseListener *ml) {
 	mouse_listeners.push_back(ml);
 }
+void addKeyboardClassListener(KeyListener* kl) {
+	key_class_listeners.push_back(kl);
+}
+
+void removeMouseListener(MouseListener *ml) {
+	for(uint i=0; i<mouse_listeners.size(); i++) {
+		if(mouse_listeners[i] == ml) {
+			mouse_listeners.erase(mouse_listeners.begin() + i);
+			break;
+		}
+	}
+}
+void removeKeyboardClassListener(KeyListener* kl) {
+	for(uint i=0; i<key_class_listeners.size(); i++) {
+		if(key_class_listeners[i] == kl) {
+			key_class_listeners.erase(key_class_listeners.begin() + i);
+			break;
+		}
+	}
+}
+
 
 void actionListener(ActiveObject *caller, int event) {
 	if(event & ACTION_REQUEST_REMASK)
@@ -117,6 +141,8 @@ void drawScene() {
 	objectSet.paintSelectionBox();
 	for(vector<Button*>::size_type i=0; i<buttons.size(); i++)
 		buttons[i]->paint();
+	for(vector<TextField*>::size_type i=0; i<textFields.size(); i++)
+		textFields[i]->paint();
 	if(does_hover)
 		objectSet.paintMetaInfoBox(last_mouse_x, last_mouse_y);
 
@@ -224,6 +250,15 @@ void readFile(const char *filename) {
 }
 
 void handleKeypress(unsigned char key, int x, int y) {
+	SplineGUI *gui = SplineGUI::getInstance();
+	for(uint i=0; i<gui->keyListeners_.size(); i++)
+		gui->keyListeners_[i](key);
+	for(uint i=0; i<key_class_listeners.size(); i++)
+		key_class_listeners[i]->handleKeypress(key,x,y);
+	
+	if(!gui->isControlKeysEnabled() )
+		return;
+
 	if(key == 'c') {
 		objectSet.changeControlMesh();
 		objectSet.removeSelected();
@@ -254,9 +289,6 @@ void handleKeypress(unsigned char key, int x, int y) {
 		exit(0);
 	}
 
-	SplineGUI *gui = SplineGUI::getInstance();
-	for(uint i=0; i<gui->keyListeners_.size(); i++)
-		gui->keyListeners_[i](key);
 }
 
 void processMouse(int button, int state, int x, int y) {
@@ -389,6 +421,7 @@ SplineGUI::SplineGUI() {
 	// initalize SplineGUI private attributes
 	next_button_x = 10;
 	next_button_y = 20;
+	controlKeysEnabled = true;
 
 	// initalize GLUT
 	int argc = 0;
@@ -415,12 +448,12 @@ SplineGUI::SplineGUI() {
 	view_panels.push_back(&cam);
 	for(uint i=0; i<view_panels.size(); i++) {
 		addMouseListener(view_panels[i]);
-		((ActiveObject*)view_panels[i])->setActionListener(actionListener);
+		((ActiveObject*)view_panels[i])->addActionListener(actionListener);
 	}
 
 	// setup DisplayObject interaction (curves, surfaces etc)
 	addMouseListener(&objectSet);
-	((ActiveObject*) &objectSet)->setActionListener(actionListener);
+	((ActiveObject*) &objectSet)->addActionListener(actionListener);
 
 	// set hover start timing 
 	gettimeofday(&last_mouse_move, NULL);
@@ -545,8 +578,44 @@ void SplineGUI::addButton(Button *b) {
 	next_button_x += width + 10;
 	b->setSizeAndPos(x, y, width, height);
 	addMouseListener((MouseListener*)b);
-	((ActiveObject*) b)->setActionListener(actionListener);
+	((ActiveObject*) b)->addActionListener(actionListener);
 	buttons.push_back(b);
+}
+
+void SplineGUI::addTextField(TextField *tf) {
+	int width   = tf->getWidth();
+	int height  = tf->getHeight();
+	int x       = next_button_x;
+	int y       = next_button_y;
+
+	next_button_x += width + 10;
+	tf->setSizeAndPos(x, y, width, height);
+	addMouseListener(tf);
+	addKeyboardClassListener((KeyListener*) tf);
+	((ActiveObject*) tf)->addActionListener(actionListener);
+	textFields.push_back(tf);
+}
+
+void SplineGUI::removeTextField(TextField *tf) {
+	removeMouseListener(tf);
+	removeKeyboardClassListener((KeyListener*)tf);
+	for(uint i=0; i<textFields.size(); i++) {
+		if(textFields[i] == tf) {
+			textFields.erase(textFields.begin() + i);
+			break;
+		}
+	}
+	delete tf;
+}
+
+//! \brief true if GUI should interpet special key-characters (c,q,space etc) as view control
+//!        false if these are to be ignored (i.e. only passed to key listeners)
+void SplineGUI::enableControlKeys(bool controlKeysEnabled) {
+	this->controlKeysEnabled = controlKeysEnabled;
+}
+
+bool SplineGUI::isControlKeysEnabled() {
+	return controlKeysEnabled;
 }
 
 void SplineGUI::addKeyboardListener(void (*keyListener)(unsigned char)) {

@@ -270,7 +270,7 @@ void CurveDisplay::processMousePassiveMotion(int x, int y) {
 }
 
 /*
-void CurveDisplay::setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
+void CurveDisplay::addActionListener(void (*actionPerformed)(ActiveObject*, int )) {
 	this->actionPerformed = actionPerformed;
 }
 */
