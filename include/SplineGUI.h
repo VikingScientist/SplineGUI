@@ -29,8 +29,10 @@ typedef boost::shared_ptr<Go::SplineVolume>  VolumePointer;
 
 class DisplayObjectSet;
 class MouseListener;
+class KeyListener;
 class ActiveObject;
 class Button;
+class TextField;
 
 /**
  * \todo Is it possible to remove the use of the Workaround_namespace and replace this by
@@ -40,6 +42,9 @@ class Button;
 namespace Workaround_namespace {
 
 	void addMouseListener(MouseListener *ml);
+	void addKeyboardClassListener(KeyListener* kl);
+	void removeMouseListener(MouseListener *ml);
+	void removeKeyboardClassListener(KeyListener* kl);
 	void actionListener(ActiveObject *caller, int event);
 	void updateMouseMasks();
 	void drawScene();
@@ -67,6 +72,7 @@ class SplineGUI {
 
 		int next_button_x;
 		int next_button_y;
+		bool controlKeysEnabled;
 		
 	public:
 		// data management
@@ -86,7 +92,11 @@ class SplineGUI {
 
 		// interaction management
 		void addButton(Button *b);
+		void addTextField(TextField *tf);
+		void removeTextField(TextField *tf);
 		void addKeyboardListener(void (*handleKeyPress)(unsigned char));
+		void enableControlKeys(bool controlKeysEnabled);
+		bool isControlKeysEnabled() ;
 
 		// window handling
 		void setSplineColor(float r, float g, float b);
