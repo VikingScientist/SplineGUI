@@ -56,6 +56,7 @@ FILE(GLOB_RECURSE SplineLIB_SRCS src/Button.cpp
                                  src/PointDisplay.cpp
                                  src/SplineGUI.cpp
                                  src/SurfaceDisplay.cpp
+                                 src/TextField.cpp
                                  src/VolumeDisplay.cpp)
 ADD_LIBRARY(SplineGUI ${SplineLIB_SRCS})
 TARGET_LINK_LIBRARIES(SplineGUI ${DEPLIBS})
