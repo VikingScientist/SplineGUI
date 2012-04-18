@@ -6,11 +6,13 @@ FIND_PATH(GPM_INCLUDES
           NAMES
           GPM/primitives.h
           PATHS
+          /usr/local/include
           $ENV{HOME}/include)
 
 FIND_LIBRARY(GPM_LIBRARIES 
              GPM
              PATHS
+			 /usr/local/lib
              $ENV{HOME}/lib)
 
 INCLUDE(FindPackageHandleStandardArgs)
