@@ -36,10 +36,10 @@ void DisplayObjectSet::tesselateAll(int *n) {
 		(*obj)->tesselate(n);
 }
 
-void DisplayObjectSet::setActionListener(void (*actionPerformed)(ActiveObject*, int )) {
-	this->actionPerformed = actionPerformed;
+void DisplayObjectSet::addActionListener(void (*actionPerformed)(ActiveObject*, int )) {
+	this->listeners.push_back(actionPerformed);
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj != objects.end(); ++obj)
-		(*obj)->setActionListener(actionPerformed);
+		(*obj)->addActionListener(actionPerformed);
 }
 
 void DisplayObjectSet::paintMetaInfoBox(int x, int y) {
@@ -175,7 +175,8 @@ int DisplayObjectSet::objectAtPosition(int x, int y) {
 void DisplayObjectSet::addObject(DisplayObject* obj) {
 	objects.push_back((DisplayObject*) obj);
 	obj->tesselate(default_resolution);
-	if(actionPerformed) obj->setActionListener(actionPerformed);
+	for(size_t i=0; i<listeners.size(); i++)
+		obj->addActionListener(listeners[i]);
 	hasNewObjects = true;
 }
 

@@ -36,7 +36,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		void changeControlMesh();
 		void colorSelectedByParameterValues(bool show_color);
 		void changeParametric();
-		void setActionListener(void (*actionPerformed)(ActiveObject*, int )) ;
+		void addActionListener(void (*actionPerformed)(ActiveObject*, int )) ;
 		void setColor(DISPLAY_CLASS_TYPE type, float r, float g, float b);
 		void setLineWidth(int width);
 		void setPointSize(int size);

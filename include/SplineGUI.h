@@ -113,7 +113,7 @@ class SplineGUI {
 		 window has been closed, so make sure to read all input and set
 		 all parameters prior to showing the GUI. After the GUI have been
 		 shown, all interaction with the program should be with either
-		 setActionListener (for buttons) or MouseListener.
+		 addActionListener (for buttons) or MouseListener.
 		******************************************************/
 		static SplineGUI* getInstance() {
 			if(!instance_)
