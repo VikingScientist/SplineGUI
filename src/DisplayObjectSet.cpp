@@ -223,10 +223,17 @@ void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
 		if((*obj)->classType() == type || type==ALL) {
 			hidden.push_back(*obj);
+			// all hidden objects need to be unselected
+			set<DisplayObject*>::iterator sel_it = selected.find(*obj);
+			if(sel_it != selected.end()) {
+				selected.erase(sel_it);
+				cout << "Selected guy hidden\n";
+			}
 			objects.erase(obj);
 			obj--;
 		}
 	}
+	/*
 	bool anything_erased ;
 	do {
 		anything_erased = false;
@@ -239,6 +246,7 @@ void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
 			}
 		}
 	} while(anything_erased);
+	*/
 	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
 }
 
@@ -270,7 +278,13 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 		if(abs(startX-drawX)+abs(startY-drawY) < 3) {
 			int obj_i = objectAtPosition(x,y);
 			if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
-				selected.insert(objects[obj_i]);
+				// if object is already selected, deselect it else we add it
+				set<DisplayObject*>::iterator it = selected.find(objects[obj_i]);
+				if(it != selected.end()) {
+					selected.erase(it);
+				} else {
+					selected.insert(objects[obj_i]);
+				}
 			}
 		} else {
 			int lowx  = (startX<drawX) ? startX : drawX;
@@ -281,6 +295,7 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 				for(int yi=lowy; yi<=highy; yi++) {
 					int obj_i = objectAtPosition(xi,yi);
 					if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
+						// box selection only allows elements to be added to selection
 						selected.insert(objects[obj_i]);
 					}
 				}
