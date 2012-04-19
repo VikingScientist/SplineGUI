@@ -492,7 +492,11 @@ int main(int argc, char **argv) {
 	objSet->setLineWidth(5);
 	objSet->setPointSize(14);
 	gui->hideObjects(VOLUME);
-	// gui->hideObjects(SURFACE);
+	if(isVolumeModel)
+		gui->hideObjects(CURVE);
+	else
+		gui->hideObjects(SURFACE);
+	gui->hideObjects(POINT);
 
 	showVolumes->makeOnOffButton();
 	showFaces->makeOnOffButton();
@@ -501,8 +505,11 @@ int main(int argc, char **argv) {
 
 	showVolumes->setSelected(false);
 	showFaces->setSelected(true);
-	showLines->setSelected(true);
-	showPoints->setSelected(true);
+	if(isVolumeModel)
+		showLines->setSelected(false);
+	else
+		showLines->setSelected(true);
+	showPoints->setSelected(false);
 
 	showVolumes->setOnClick(ButtonClick);
 	showFaces->setOnClick(ButtonClick);
@@ -510,8 +517,7 @@ int main(int argc, char **argv) {
 	showPoints->setOnClick(ButtonClick);
 
 	if(isVolumeModel)
-		gui->addButton(showVolumes);
-	gui->addButton(showFaces);
+		gui->addButton(showFaces);
 	gui->addButton(showLines);
 	gui->addButton(showPoints);
 
