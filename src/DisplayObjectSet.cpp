@@ -225,10 +225,8 @@ void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
 			hidden.push_back(*obj);
 			// all hidden objects need to be unselected
 			set<DisplayObject*>::iterator sel_it = selected.find(*obj);
-			if(sel_it != selected.end()) {
+			if(sel_it != selected.end())
 				selected.erase(sel_it);
-				cout << "Selected guy hidden\n";
-			}
 			objects.erase(obj);
 			obj--;
 		}
