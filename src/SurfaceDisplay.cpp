@@ -22,6 +22,7 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) : DisplayObject(
 	draw_contol_mesh       = false;
 	colorByParametervalues = false;
 	faceIndex              = -1;
+	dim                    = surf->dimension();
 	setColor(.8, .4, .05); // orange
 	// setColor(.6, .6, .6); // light gray
 
@@ -70,8 +71,6 @@ void SurfaceDisplay::tesselate(int *n) {
 	if(cp_pos)         delete[] cp_pos;
 	if(cp_lines)       delete[] cp_lines;
 
-	int dim = surf->dimension();
-
 	double p_u_min = surf->startparam_u();
 	double p_u_max = surf->endparam_u();
 	double p_v_min = surf->startparam_v();
@@ -94,7 +93,10 @@ void SurfaceDisplay::tesselate(int *n) {
 	}
 
 	// evaluate the surface parameters coordinates
-	surf->gridEvaluator(n[0], n[1], pts, normals_evaluated, param_u, param_v, false);
+	if(dim == 3)
+		surf->gridEvaluator(n[0], n[1], pts, normals_evaluated, param_u, param_v, false);
+	else 
+		surf->gridEvaluator(n[0], n[1], pts, param_u, param_v);
 
 	// store the number of the different primitives
 	int nCoef[2];
@@ -110,9 +112,9 @@ void SurfaceDisplay::tesselate(int *n) {
 	// allocate memory
 	triangle_strip = new GLuint[triangle_count];
 	positions      = new GLdouble[n[0]*n[1]*dim];
-	normals        = new GLdouble[n[0]*n[1]*dim];
+	normals        = new GLdouble[n[0]*n[1]*3];
 	param_values   = new GLdouble[n[0]*n[1]*3];
-	cp_pos         = new GLdouble[cp_count*3];
+	cp_pos         = new GLdouble[cp_count*dim];
 	cp_lines       = new GLuint[line_count];
 
 	// store the parametrization (i.e. (u,v,w)-coordinates which maps to the (x,y,z)-coordinates)
@@ -153,14 +155,18 @@ void SurfaceDisplay::tesselate(int *n) {
 
 	// store the actual geometric data points
 	k = 0;
-	for(int j=0; j<n[1]; j++) {
-		for(int i=0; i<n[0]; i++) {
-			for(int d=0; d<dim; d++) {
+	for(int j=0; j<n[1]; j++)
+		for(int i=0; i<n[0]; i++)
+			for(int d=0; d<dim; d++, k++)
 				positions[k] = pts[k];
-				normals[k]   = normals_evaluated[k];
-				k++;
-			}
-		}
+	k = 0;
+	for(int j=0; j<n[1]; j++)
+		for(int i=0; i<n[0]; i++)
+			for(int d=0; d<3; d++, k++) { // <--- normals always in 3 dimensions 
+				if(dim==3)
+					normals[k]   = normals_evaluated[k];
+				else 
+					normals[k]   = (d==2); // gives normal (0,0,1) for all points
 	}
 
 	// construct the triangulation
@@ -180,14 +186,12 @@ void SurfaceDisplay::tesselate(int *n) {
 		cp = surf->rcoefs_begin();
 		int i=0;
 		while(cp != surf->rcoefs_end() ) {
-			cp_pos[i  ] = *cp++;
-			cp_pos[i+1] = *cp++;
-			cp_pos[i+2] = *cp++;
+			for(int d=0; d<dim; d++)
+				cp_pos[i+d] = *cp++;
 			// goTools store CP premultiplied by weight
 			// here we divide this away
-			cp_pos[i++] /= *cp; 
-			cp_pos[i++] /= *cp;
-			cp_pos[i++] /= *cp;
+			for(int d=0; d<dim; d++)
+				cp_pos[i++] /= *cp;
 			cp++;
 		}
 	} else {
@@ -221,14 +225,14 @@ void SurfaceDisplay::paint() {
 		glColor3f(0,0,0);
 		glLineWidth(2);
 		glPointSize(6);
-		glVertexPointer(3, GL_DOUBLE, 0, cp_pos);
+		glVertexPointer(dim, GL_DOUBLE, 0, cp_pos);
 		glDrawElements(GL_LINES, line_count, GL_UNSIGNED_INT, cp_lines);
 		glDrawArrays(GL_POINTS, 0, cp_count);
 	} else {
 		glEnable(GL_LIGHTING);
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glColor3f(color[0], color[1], color[2]);
-		glVertexPointer(3, GL_DOUBLE, 0, positions);
+		glVertexPointer(dim, GL_DOUBLE, 0, positions);
 		glNormalPointer(GL_DOUBLE, 0, normals);
 		glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 		glDisableClientState(GL_NORMAL_ARRAY);
@@ -247,7 +251,7 @@ void SurfaceDisplay::paintSelected() {
 		glEnableClientState(GL_COLOR_ARRAY);
 		glColorPointer(3, GL_DOUBLE, 0, param_values);
 	}
-	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glVertexPointer(dim, GL_DOUBLE, 0, positions);
 	glNormalPointer(GL_DOUBLE, 0, normals);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -260,7 +264,7 @@ void SurfaceDisplay::paintSelected() {
 }
 
 void SurfaceDisplay::paintMouseAreas() {
-	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glVertexPointer(dim, GL_DOUBLE, 0, positions);
 	glColorPointer(3, GL_DOUBLE, 0, param_values);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 }
@@ -277,7 +281,7 @@ void SurfaceDisplay::readMouseAreas() {
 }
 
 void SurfaceDisplay::paintMouseAreas(float r, float g, float b) {
-	glVertexPointer(3, GL_DOUBLE, 0, positions);
+	glVertexPointer(dim, GL_DOUBLE, 0, positions);
 	glColor3f(r,g,b);
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 }
@@ -330,7 +334,6 @@ void SurfaceDisplay::myGridEvaluator(int n1, int n2, vector<double>& pts, vector
 		param_v.push_back( surf->startparam_v() + parm_v_length*i/(n2-1) );
 	vector<vector<double> > basis_values;
 	surf->computeBasisGrid(param_u, param_v, basis_values);
-	int dim = surf->dimension();
 
 	pts.resize(basis_values.size()*dim, 0);
 	nor.resize(basis_values.size()*dim, 0);

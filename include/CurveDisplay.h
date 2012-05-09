@@ -46,6 +46,7 @@ class CurveDisplay : public DisplayObject {
 		int width;
 		int height;
 		int line_width;
+		int dim;
 		double *positions;
 		double *param_values;
 		GLfloat *xi_buffer;
