@@ -48,6 +48,7 @@ class SurfaceDisplay : public DisplayObject {
 		int faceIndex;
 		int line_count; // for control polygon
 		int cp_count;
+		int dim;
 		GLdouble *cp_pos;
 		GLuint   *cp_lines;
 		GLdouble *positions;
