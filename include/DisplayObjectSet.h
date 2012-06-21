@@ -57,6 +57,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 
 	private:
 		int objectAtPosition(int x, int y);
+		int objectAtPosition(int x, int y, int width, int height);
 
 		std::vector<DisplayObject*> objects;
 		std::set<DisplayObject*> selected;

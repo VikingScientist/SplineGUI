@@ -20,9 +20,9 @@ class MVPHandler : public MouseListener, ActiveObject {
 		MVPHandler(int x, int y, int w, int h) : MouseListener(x,y,w,h) { };
 		~MVPHandler() { } ;
 		
-		virtual void processMouse(int button, int state, int x, int y) { }
-		virtual void processMouseActiveMotion(int x, int y) { }
-		virtual void processMousePassiveMotion(int x, int y) { }
+		virtual void processMouse(int button, int state, int x, int y) ;
+		virtual void processMouseActiveMotion(int x, int y) ;
+		virtual void processMousePassiveMotion(int x, int y) ;
 		virtual void onEnter(int x, int y);
 		virtual void onExit(int x, int y) ;
 
