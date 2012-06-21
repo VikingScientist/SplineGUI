@@ -156,8 +156,6 @@ void DisplayObjectSet::paintAllMouseAreas(vector<MVPHandler*> viewpanels) {
 }
 
 int DisplayObjectSet::objectAtPosition(int x, int y) {
-	int width  = glutGet(GLUT_WINDOW_WIDTH);
-	int height = glutGet(GLUT_WINDOW_HEIGHT);
 	if(x<=0 || y<=0 || x>width || y>height)
 		return -1;
 	int k = (width*y+x)*3;
@@ -289,13 +287,19 @@ void DisplayObjectSet::processMouse(int button, int state, int x, int y) {
 			int highx = (startX<drawX) ? drawX  : startX;
 			int lowy  = (startY<drawY) ? startY : drawY;
 			int highy = (startY<drawY) ? drawY  : startY;
-			for(int xi=lowx; xi<=highx; xi++) {
-				for(int yi=lowy; yi<=highy; yi++) {
+			bool containedObj[objects.size()];
+			for(uint i=0; i<objects.size(); i++)
+				containedObj[i] = false;
+			for(int xi=lowx; xi<=highx; xi+=2) {
+				for(int yi=lowy+(xi%2); yi<=highy; yi++) {
 					int obj_i = objectAtPosition(xi,yi);
 					if(obj_i>=0 && (classType == ALL || objects[obj_i]->classType()==classType)) {
 						// box selection only allows elements to be added to selection
-						selected.insert(objects[obj_i]);
+						containedObj[obj_i] = true;
 					}
+					for(uint i=0; i<objects.size(); i++)
+						if(containedObj[i])
+							selected.insert(objects[i]);
 				}
 			}
 		}
