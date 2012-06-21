@@ -22,8 +22,8 @@ class Button : public MouseListener, ActiveObject {
 		void processMouse(int button, int state, int x, int y);
 		void processMouseActiveMotion(int x, int y);
 		void processMousePassiveMotion(int x, int y);
-		void onEnter() ;
-		void onExit() ;
+		void onEnter(int x, int y) ;
+		void onExit(int x, int y) ;
 		void setOnClick(void (*onClick)(Button*)) ;
 		void makeOnOffButton();
 		void setSelected(bool on);

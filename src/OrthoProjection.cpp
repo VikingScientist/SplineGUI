@@ -1,14 +1,11 @@
 #include "OrthoProjection.h"
 #include <GL/glut.h>
+#include <iostream>
 
 using namespace std;
 
 OrthoProjection::OrthoProjection() {
 	just_warped             = false;
-	right_mouse_button_down = false;
-	last_mouse_x            = 0;
-	last_mouse_y            = 0;
-	specialKey              = 0;
 	view                    = TOP;
 	u0                      = 0;
 	v0                      = 0;
@@ -20,10 +17,6 @@ OrthoProjection::OrthoProjection() {
 
 OrthoProjection::OrthoProjection(enum viewplane view) {
 	just_warped             = false;
-	right_mouse_button_down = false;
-	last_mouse_x            = 0;
-	last_mouse_y            = 0;
-	specialKey              = 0;
 	this->view              = view;
 	u0                      = 0;
 	v0                      = 0;
@@ -35,10 +28,6 @@ OrthoProjection::OrthoProjection(enum viewplane view) {
 
 OrthoProjection::OrthoProjection(int x, int y, int w, int h) : MVPHandler(x,y,w,h) {
 	just_warped             = false;
-	right_mouse_button_down = false;
-	last_mouse_x            = 0;
-	last_mouse_y            = 0;
-	specialKey              = 0;
 	view                    = TOP;
 	u0                      = 0;
 	v0                      = 0;
@@ -53,25 +42,14 @@ OrthoProjection::~OrthoProjection() {
 
 
 void OrthoProjection::processMouse(int button, int state, int x, int y) {
-/*
-	if(button == GLUT_DOWN) {
-		double u, v;
-		uvAt(x,y,u,v);
-		printf("Mouseclick at (u,v) = (%.3f, %.3f)\n", u,v);
-	}
-*/
-	specialKey = glutGetModifiers();
+	MouseListener::processMouse(button, state, x, y);
+
 	if(button == GLUT_RIGHT_BUTTON) {
 		if(state == GLUT_UP) {
-			right_mouse_button_down = false;
 			glutSetCursor(GLUT_CURSOR_INHERIT);
 			fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
-		} else {
-			right_mouse_button_down = true;
-		}
+		} 
 	}
-	last_mouse_x = x;
-	last_mouse_y = y;
 }
 
 void OrthoProjection::processMouseActiveMotion(int x, int y) {
@@ -81,7 +59,7 @@ void OrthoProjection::processMouseActiveMotion(int x, int y) {
 			glutSetCursor(GLUT_CURSOR_UP_DOWN);
 			if(just_warped) {
 				just_warped = false;
-				last_mouse_y = y;
+				y = last_mouse_y ;
 			}
 			double zoom = 0.054*(y-last_mouse_y);
 			double scale = v_h/u_w;
@@ -90,17 +68,6 @@ void OrthoProjection::processMouseActiveMotion(int x, int y) {
 			if(u_w<0) {
 				u_w = 1e-4;
 				v_h = u_w*scale;
-			}
-			if(y > vp_height) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				y = MouseListener::getY();
-				just_warped = true;
-				glutWarpPointer(x+MouseListener::getX(), window_height - y);
-			} else if(y < 0) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				y = MouseListener::getY() + MouseListener::getHeight();
-				just_warped = true;
-				glutWarpPointer(x+MouseListener::getX(), window_height - y);
 			}
 		} else if(specialKey == GLUT_ACTIVE_SHIFT) {
 			// paning
@@ -114,12 +81,36 @@ void OrthoProjection::processMouseActiveMotion(int x, int y) {
 		}
 		fireActionEvent(ACTION_REQUEST_REPAINT);
 	}
-	last_mouse_x = x;
-	last_mouse_y = y;
+	MouseListener::processMouseActiveMotion(x, y);
 }
 
 void OrthoProjection::processMousePassiveMotion(int x, int y) {
+	MouseListener::processMousePassiveMotion(x, y);
 }
+
+void OrthoProjection::onEnter(int x, int y) {
+	MVPHandler::onEnter(x,y);
+}
+
+void OrthoProjection::onExit(int x, int y) {
+	if(right_mouse_button_down) {
+		if(specialKey == GLUT_ACTIVE_CTRL) {
+			if(y >= vp_height) {
+				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+				just_warped = true;
+				last_mouse_y = 0;
+				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY());
+			} else if(y <= 0) {
+				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+				just_warped = true;
+				last_mouse_y = vp_height;
+				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY()-vp_height);
+			}
+		}
+	}
+	MVPHandler::onExit(x, y);
+}
+
 
 
 void OrthoProjection::setModelView() {

@@ -18,9 +18,12 @@ class Camera : public MVPHandler {
 		void setProjection();
 		void handleResize(int x, int y, int w, int h);
 		GLfloat getR();
-		void processMouse(int button, int state, int x, int y);
-		void processMouseActiveMotion(int x, int y);
-		void processMousePassiveMotion(int x, int y);
+		virtual void processMouse(int button, int state, int x, int y);
+		virtual void processMouseActiveMotion(int x, int y);
+		virtual void processMousePassiveMotion(int x, int y);
+		virtual void onEnter(int x, int y) ;
+		virtual void onExit(int x, int y)  ;
+
 		void setAdaptiveTesselation();
 		void paintBackground();
 		void paintMeta();
@@ -47,10 +50,6 @@ class Camera : public MVPHandler {
 		GLfloat y;
 		GLfloat z;
 
-		int specialKey;
-		bool right_mouse_button_down;
-		int last_mouse_x;
-		int last_mouse_y;
 		bool upside_down;
 		bool adaptive_tesselation;
 		bool just_warped;

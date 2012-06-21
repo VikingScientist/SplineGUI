@@ -3,41 +3,26 @@
 #define _MOUSE_LISTENER_H
 
 class MouseListener {
-	private:
+	protected:
 		bool hover;
 		bool catchAll;
-		int x, y;
-		int width, height;
+		int  x, y;
+		int  width, height;
+		int  last_mouse_x;
+		int  last_mouse_y;
+		int  specialKey;
+		bool right_mouse_button_down;
+		bool left_mouse_button_down;
 
 	public:
-		MouseListener() {
-			this->x      = 0;
-			this->y      = 0;
-			this->width  = 0;
-			this->height = 0;
-			hover        = false;
-			catchAll     = true;
-		}
-		MouseListener(int x, int y, int width, int height) {
-			this->x      = x;
-			this->y      = y;
-			this->width  = width;
-			this->height = height;
-			hover        = false;
-			catchAll     = false;
-		}
-		virtual void processMouse(int button, int state, int x, int y) { }
-		virtual void processMouseActiveMotion(int x, int y) { }
-		virtual void processMousePassiveMotion(int x, int y) { }
-		virtual void onEnter() { hover = true;}
-		virtual void onExit()  { hover = false;}
-		void setSize(int x, int y, int width, int height) {
-			this->x      = x;
-			this->y      = y;
-			this->width  = width;
-			this->height = height;
-			catchAll     = false;
-		}
+		MouseListener() ;
+		MouseListener(int x, int y, int width, int height) ;
+		virtual void processMouse(int button, int state, int x, int y) ;
+		virtual void processMouseActiveMotion(int x, int y) ;
+		virtual void processMousePassiveMotion(int x, int y) ;
+		virtual void onEnter(int x, int y) { hover = true;}
+		virtual void onExit(int x, int y)  { hover = false;}
+		void setSize(int x, int y, int width, int height) ;
 		bool isHover()        { return hover; }
 		bool isCatchingAll()  { return catchAll; }
 		bool isContained(int px, int py)  { return (x<px && px<x+width && y<py && py<y+height); }

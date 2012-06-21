@@ -248,18 +248,14 @@ void Camera::setModelView() {
  * \param y position of the mouse at the time of use
  *************************************************************************************/
 void Camera::processMouse(int button, int state, int x, int y) {
-	specialKey = glutGetModifiers();
+	MouseListener::processMouse(button, state, x, y);
+
 	if(button == GLUT_RIGHT_BUTTON) {
 		if(state == GLUT_UP) {
-			right_mouse_button_down = false;
 			glutSetCursor(GLUT_CURSOR_INHERIT);
 			fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
-		} else {
-			right_mouse_button_down = true;
-		}
+		} 
 	}
-	last_mouse_x = x;
-	last_mouse_y = y;
 }
 
 /**********************************************************************************//**
@@ -274,23 +270,10 @@ void Camera::processMouseActiveMotion(int x, int y) {
 			glutSetCursor(GLUT_CURSOR_UP_DOWN);
 			if(just_warped) {
 				just_warped = false;
-				last_mouse_y = y;
+				y = last_mouse_y;
 			}
 			GLfloat speed_r = -speed_scale_zoom*((float) y-last_mouse_y);
 			rotate(speed_r, 0, 0);
-			if(y > vp_height) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				y = MouseListener::getY();
-				just_warped = true;
-				// last_mouse_y = y;
-				glutWarpPointer(x+MouseListener::getX(), window_height - y);
-			} else if(y < 0) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				y = MouseListener::getY() + MouseListener::getHeight();
-				just_warped = true;
-				// last_mouse_y = y;
-				glutWarpPointer(x+MouseListener::getX(), window_height - y);
-			}
 		} else if(specialKey == GLUT_ACTIVE_SHIFT) {
 			// paning
 			glutSetCursor(GLUT_CURSOR_CROSSHAIR);
@@ -306,8 +289,7 @@ void Camera::processMouseActiveMotion(int x, int y) {
 		}
 		fireActionEvent(ACTION_REQUEST_REPAINT);
 	}
-	last_mouse_x = x;
-	last_mouse_y = y;
+	MouseListener::processMouseActiveMotion(x,y);
 }
 
 /**********************************************************************************//**
@@ -316,8 +298,30 @@ void Camera::processMouseActiveMotion(int x, int y) {
  * \param y position of the mouse at the time of use
  *************************************************************************************/
 void Camera::processMousePassiveMotion(int x, int y) {
-	last_mouse_x = x;
-	last_mouse_y = y;
+	MouseListener::processMousePassiveMotion(x,y);
+}
+
+void Camera::onEnter(int x, int y) {
+	MVPHandler::onEnter(x,y);
+}
+
+void Camera::onExit(int x, int y) {
+	if(right_mouse_button_down) {
+		if(specialKey == GLUT_ACTIVE_CTRL) {
+			if(y >= vp_height) {
+				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+				just_warped = true;
+				last_mouse_y = 0;
+				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY());
+			} else if(y <= 0) {
+				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
+				just_warped = true;
+				last_mouse_y = vp_height;
+				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY()-vp_height);
+			}
+		}
+	}
+	MVPHandler::onExit(x, y);
 }
 
 /**********************************************************************************//**

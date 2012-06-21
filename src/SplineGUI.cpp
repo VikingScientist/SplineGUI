@@ -333,18 +333,18 @@ void processMouseActiveMotion(int x, int y) {
 		MouseListener* l = mouse_listeners[i];
 		if(l->isCatchingAll() || l->isContained(x,y)) {
 			if( !l->isHover()) 
-				l->onEnter();
+				l->onEnter(x-l->getX(), y-l->getY());
 			l->processMouseActiveMotion(x-l->getX(), y-l->getY());
 		} else if( l->isHover() ) {
-			l->onExit();
+			l->onExit(x-l->getX(), y-l->getY());
 		}
 	}
 	for(uint i=0; i<selected_mouse_listeners.size(); i++) {
 		MouseListener* l = selected_mouse_listeners[i];
 		if(l->isContained(x,y) && !l->isHover() )
-			l->onEnter();
+			l->onEnter(x-l->getX(), y-l->getY());
 		else if(!l->isContained(x,y) && l->isHover() )
-			l->onExit();
+			l->onExit(x-l->getX(), y-l->getY());
 		l->processMouseActiveMotion(x-l->getX(), y-l->getY());
 	}
 }
@@ -362,18 +362,18 @@ void processMousePassiveMotion(int x, int y) {
 		MouseListener* l = mouse_listeners[i];
 		if(l->isCatchingAll() || l->isContained(x,y)) {
 			if( !l->isHover()) 
-				l->onEnter();
+				l->onEnter(x-l->getX(), y-l->getY());
 			l->processMousePassiveMotion(x-l->getX(), y-l->getY());
 		} else if( l->isHover() ) {
-			l->onExit();
+			l->onExit(x-l->getX(), y-l->getY());
 		}
 	}
 	for(uint i=0; i<selected_mouse_listeners.size(); i++) {
 		MouseListener* l = selected_mouse_listeners[i];
 		if(l->isContained(x,y) && !l->isHover() )
-			l->onEnter();
+			l->onEnter(x-l->getX(), y-l->getY());
 		else if(!l->isContained(x,y) && l->isHover() )
-			l->onExit();
+			l->onExit(x-l->getX(), y-l->getY());
 		l->processMousePassiveMotion(x-l->getX(), y-l->getY());
 	}
 }

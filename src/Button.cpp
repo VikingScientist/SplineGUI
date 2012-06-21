@@ -201,11 +201,11 @@ void Button::processMouseActiveMotion(int x, int y) {
 void Button::processMousePassiveMotion(int x, int y) {
 
 }
-void Button::onEnter() {
-	MouseListener::onEnter();
+void Button::onEnter(int x, int y) {
+	MouseListener::onEnter(x,y);
 }
-void Button::onExit() {
-	MouseListener::onExit();
+void Button::onExit(int x, int y) {
+	MouseListener::onExit(x,y);
 	if(pressed && !isOnOffButton) {
 		bevel_size -= 1;
 		pressed = false;
