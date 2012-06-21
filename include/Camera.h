@@ -21,16 +21,12 @@ class Camera : public MVPHandler {
 		virtual void processMouse(int button, int state, int x, int y);
 		virtual void processMouseActiveMotion(int x, int y);
 		virtual void processMousePassiveMotion(int x, int y);
-		virtual void onEnter(int x, int y) ;
-		virtual void onExit(int x, int y)  ;
 
 		void setAdaptiveTesselation();
 		void paintBackground();
 		void paintMeta();
 		int getTesselationRes();
 
-		GLint vp_width; // viewport width
-		GLint vp_height; // viewport height
 
 	private:
 		void recalc_pos();
@@ -52,7 +48,6 @@ class Camera : public MVPHandler {
 
 		bool upside_down;
 		bool adaptive_tesselation;
-		bool just_warped;
 };
 
 #endif

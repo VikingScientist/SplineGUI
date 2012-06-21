@@ -301,28 +301,6 @@ void Camera::processMousePassiveMotion(int x, int y) {
 	MouseListener::processMousePassiveMotion(x,y);
 }
 
-void Camera::onEnter(int x, int y) {
-	MVPHandler::onEnter(x,y);
-}
-
-void Camera::onExit(int x, int y) {
-	if(right_mouse_button_down) {
-		if(specialKey == GLUT_ACTIVE_CTRL) {
-			if(y >= vp_height) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				just_warped = true;
-				last_mouse_y = 0;
-				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY());
-			} else if(y <= 0) {
-				int window_height = glutGet(GLUT_WINDOW_HEIGHT);
-				just_warped = true;
-				last_mouse_y = vp_height;
-				glutWarpPointer(x+MouseListener::getX(), window_height - MouseListener::getY()-vp_height);
-			}
-		}
-	}
-	MVPHandler::onExit(x, y);
-}
 
 /**********************************************************************************//**
  * \brief sets adaptive tesselation
