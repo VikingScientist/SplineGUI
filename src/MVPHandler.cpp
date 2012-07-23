@@ -60,3 +60,5 @@ void MVPHandler::onExit(int x, int y) {
 	MouseListener::onExit(x, y);
 }
 
+void MVPHandler::viewBoundingBox(Go::BoundingBox &box) {
+}

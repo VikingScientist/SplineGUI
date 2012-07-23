@@ -9,10 +9,13 @@ OrthoProjection::OrthoProjection() {
 	view                    = TOP;
 	u0                      = 0;
 	v0                      = 0;
+	w0                      = 0;
 	u_w                     = 20;
 	v_h                     = 20;
+	depth                   = 10;
 	vp_width                = 1;
 	vp_height               = 1;
+	size                    = 0.024;
 }
 
 OrthoProjection::OrthoProjection(enum viewplane view) {
@@ -20,10 +23,13 @@ OrthoProjection::OrthoProjection(enum viewplane view) {
 	this->view              = view;
 	u0                      = 0;
 	v0                      = 0;
+	w0                      = 0;
 	u_w                     = 20;
 	v_h                     = 20;
+	depth                   = 10;
 	vp_width                = 1;
 	vp_height               = 1;
+	size                    = 0.024;
 }
 
 OrthoProjection::OrthoProjection(int x, int y, int w, int h) : MVPHandler(x,y,w,h) {
@@ -31,10 +37,13 @@ OrthoProjection::OrthoProjection(int x, int y, int w, int h) : MVPHandler(x,y,w,
 	view                    = TOP;
 	u0                      = 0;
 	v0                      = 0;
+	w0                      = 0;
 	u_w                     = 20;
 	v_h                     = 20;
+	depth                   = 10;
 	vp_width                = 1;
 	vp_height               = 1;
+	size                    = 0.024;
 }
 
 OrthoProjection::~OrthoProjection() {
@@ -61,7 +70,7 @@ void OrthoProjection::processMouseActiveMotion(int x, int y) {
 				just_warped = false;
 				y = last_mouse_y ;
 			}
-			double zoom = 0.054*(y-last_mouse_y);
+			double zoom = 0.024*size*(y-last_mouse_y);
 			double scale = v_h/u_w;
 			u_w -= zoom;
 			v_h -= zoom*scale;
@@ -112,9 +121,10 @@ void OrthoProjection::setModelView() {
 	glLightfv(GL_LIGHT1, GL_POSITION, lightPos2);
 
 
-	glScaled(2/u_w, 2/v_h, -1.0/10); // negative z to invert back the perspective projection
-	glTranslatef(-u0, -v0, 0);
+	glScaled(2/u_w, 2/v_h, -1/depth); // negative z to invert back the perspective projection
+	glTranslatef(-u0, -v0, -w0);
 	if(view == LEFT) {
+		glTranslatef( 2*u0, 0, 0);
 		glRotatef(180, 0, 1, 0);
 		glRotatef(-90, 1, 0, 0);
 	} else if(view == FRONT) {
@@ -128,6 +138,47 @@ void OrthoProjection::setModelView() {
 void OrthoProjection::setProjection() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+}
+
+void OrthoProjection::viewBoundingBox(Go::BoundingBox &box) {
+	double border = 0.1;
+	double xmin = box.low()[0];
+	double xmax = box.high()[0];
+	double ymin = box.low()[1];
+	double ymax = box.high()[1];
+	double zmin = (box.dimension() > 2) ? box.low()[2]  : 0;
+	double zmax = (box.dimension() > 2) ? box.high()[2] : 0;
+	double dx = (xmax - xmin) ;
+	double dy = (ymax - ymin) ;
+	double dz = (zmax - zmin) ;
+	if(view == LEFT) {
+		depth = dy   * (1.0 + 2*border);
+		u_w   = dx   * (1.0 + 2*border);
+		v_h   = dz   * (1.0 + 2*border);
+		u0    = xmin - dx*border;
+		v0    = zmin - dz*border;
+		w0    = ymin - dy*border;
+	} else if(view == FRONT) {
+		depth = dx   * (1.0 + 2*border);
+		u_w   = dy   * (1.0 + 2*border);
+		v_h   = dz   * (1.0 + 2*border);
+		u0    = ymin - dy*border;
+		v0    = zmin - dz*border;
+		w0    = xmin - dx*border;
+	} else { // view == TOP 
+		depth = dz   * (1.0 + 2*border);
+		u_w   = dx   * (1.0 + 2*border);
+		v_h   = dy   * (1.0 + 2*border);
+		u0    = xmin - dx*border;
+		v0    = ymin - dy*border;
+		w0    = zmin - dz*border;
+	}
+
+	u0 += u_w/2;
+	v0 += v_h/2;
+	size = (u_w > v_h) ? u_w : v_h;
+	if(depth < 1e-13) 
+		depth = 1;
 }
 
 void OrthoProjection::handleResize(int x, int y, int w, int h)  {

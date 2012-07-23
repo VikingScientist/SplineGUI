@@ -3,6 +3,7 @@
 
 #include "MouseListener.h"
 #include "ActiveObject.h"
+#include <GoTools/utils/BoundingBox.h>
 #include <string>
 #include <GL/gl.h>
 
@@ -25,6 +26,8 @@ class MVPHandler : public MouseListener, ActiveObject {
 		virtual void processMousePassiveMotion(int x, int y) ;
 		virtual void onEnter(int x, int y);
 		virtual void onExit(int x, int y) ;
+
+		virtual void viewBoundingBox(Go::BoundingBox &box) ;
 
 		void setScissortest() ;
 		void setViewport() ;

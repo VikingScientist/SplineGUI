@@ -11,6 +11,7 @@
 #include "CurveDisplay.h"
 #include "SurfaceDisplay.h"
 #include "VolumeDisplay.h"
+#include <GoTools/utils/BoundingBox.h>
 
 class DisplayObjectSet : public MouseListener, ActiveObject {
 
@@ -50,6 +51,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		CurveDisplay*   getDisplayObject(Go::SplineCurve *c);
 		SurfaceDisplay* getDisplayObject(Go::SplineSurface *s);
 		VolumeDisplay*  getDisplayObject(Go::SplineVolume *v);
+		void            getBoundingBox(Go::BoundingBox &box) const;
 
 		DisplayObject*  getObjectAt(int x, int y);
 

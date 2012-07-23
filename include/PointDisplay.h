@@ -2,6 +2,7 @@
 #define _POINTDISPLAY_H
 
 #include <GoTools/utils/Point.h>
+#include <GoTools/utils/BoundingBox.h>
 #include <GL/glut.h>
 #include "DisplayObject.h"
 
@@ -29,6 +30,7 @@ class PointDisplay : public DisplayObject {
 		void setMaskPos(int x, int y, bool value);
 		void paintMouseAreas(float r, float g, float b) ;
 
+		void getBoundingBox(Go::BoundingBox &box) const ;
 		void setPointSize(int size);
 
 	private:

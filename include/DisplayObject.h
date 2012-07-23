@@ -4,6 +4,7 @@
 #include "MouseListener.h"
 #include "ActiveObject.h"
 #include <iostream>
+#include <GoTools/utils/BoundingBox.h>
 
 // openGL headers
 #include <GL/glut.h>
@@ -55,6 +56,7 @@ class DisplayObject : public MouseListener, ActiveObject {
 		virtual void setDrawControlMesh(bool draw) { }
 		virtual void setColorByParameterValues(bool show_color) { }
 		virtual void addActionListener(void (*actionPerformed)(ActiveObject*, int )) { ActiveObject::addActionListener(actionPerformed); }
+		virtual void getBoundingBox(Go::BoundingBox &box) const { }
 
 		// trying diffent things with the mouse-masks
 		virtual void initMouseMasks() { }

@@ -22,6 +22,8 @@ class Camera : public MVPHandler {
 		virtual void processMouseActiveMotion(int x, int y);
 		virtual void processMousePassiveMotion(int x, int y);
 
+		virtual void viewBoundingBox(Go::BoundingBox &box) ;
+
 		void setAdaptiveTesselation();
 		void paintBackground();
 		void paintMeta();
@@ -46,6 +48,7 @@ class Camera : public MVPHandler {
 		GLfloat y;
 		GLfloat z;
 
+		double size;
 		bool upside_down;
 		bool adaptive_tesselation;
 };

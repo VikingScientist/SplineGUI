@@ -4,6 +4,7 @@
 
 #include "DisplayObject.h"
 #include <GoTools/trivariate/SplineVolume.h>
+#include <GoTools/utils/BoundingBox.h>
 #include <GL/glut.h>
 #include <vector>
 class CurveDisplay;
@@ -33,6 +34,7 @@ class VolumeDisplay : public DisplayObject {
 		void setDrawControlMesh(bool draw); void setColorByParameterValues(bool draw);
 		void setSelectedColor(double r, double g, double b);
 		void setColor(double r, double g, double b);
+		void getBoundingBox(Go::BoundingBox &box) const ;
 
 		void initMouseMasks() ;
 		void setMaskPos(int x, int y, bool value) ;

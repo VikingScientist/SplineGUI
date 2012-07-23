@@ -468,6 +468,19 @@ DisplayObject* DisplayObjectSet::getObjectAt(int x, int y) {
 		return objects[i];
 }
 
+void DisplayObjectSet::getBoundingBox(Go::BoundingBox &box) const {
+	box = Go::BoundingBox();
+	Go::BoundingBox oneBox;
+	vector<DisplayObject*>::const_iterator it;
+	for(it=objects.begin(); it!=objects.end(); it++) {
+		(*it)->getBoundingBox(oneBox);
+		if(box.dimension() == 0)
+			box = oneBox;
+		else
+			box.addUnionWith(oneBox);
+	}
+}
+
 void DisplayObjectSet::setLineWidth(int width) {
 	vector<DisplayObject*>::iterator it;
 	for(it=objects.begin(); it!=objects.end(); it++)
