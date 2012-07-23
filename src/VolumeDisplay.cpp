@@ -267,3 +267,7 @@ void VolumeDisplay::paintMouseAreas(float r, float g, float b) {
 	walls[5]->paintMouseAreas(r,g,b);
 }
 
+void VolumeDisplay::getBoundingBox(Go::BoundingBox &box) const { 
+	box = volume->boundingBox();
+}
+

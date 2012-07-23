@@ -22,6 +22,7 @@
 // GoTools headers
 #include <GoTools/geometry/ParamCurve.h>
 #include <GoTools/geometry/ObjectHeader.h>
+#include <GoTools/utils/BoundingBox.h>
 
 // SplineGUI headers
 #include "Camera.h"
@@ -247,6 +248,13 @@ void readFile(const char *filename) {
 	}
 
 	inFile.close();
+
+	BoundingBox box;
+	objectSet.getBoundingBox(box);
+	cam.viewBoundingBox(box);
+	top_view.viewBoundingBox(box);
+	front_view.viewBoundingBox(box);
+	left_view.viewBoundingBox(box);
 }
 
 void handleKeypress(unsigned char key, int x, int y) {

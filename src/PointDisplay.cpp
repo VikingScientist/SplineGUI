@@ -120,4 +120,7 @@ void PointDisplay::setPointSize(int size) {
 	this->size = size;
 }
 
+void PointDisplay::getBoundingBox(Go::BoundingBox &box) const  {
+	box = BoundingBox(point, point);
+}
 

@@ -301,6 +301,10 @@ void CurveDisplay::setMaskPos(int x, int y, bool value) {
 	xi_buffer[y*width+x] = (value) ? 1.0 : 0.0;
 }
 
+void CurveDisplay::getBoundingBox(BoundingBox &box) const { 
+	box = curve->boundingBox();
+}
+
 void CurveDisplay::paintMouseAreas(float r, float g, float b) {
 	glLineWidth(line_width+8);
 	glColor3f(r,g,b);

@@ -8,8 +8,10 @@ enum viewplane {TOP, FRONT, LEFT};
 class OrthoProjection : public MVPHandler {
 
 	private:
-		double u_w, v_h; // viewport measured in object coordinates
-		double u0, v0; // lower left origin measured in object coordinates
+		double u_w, v_h;   // viewport measured in object coordinates
+		double u0, v0, w0; // lower left origin measured in object coordinates
+		double depth;      // object depth for clipping purposes
+		double size;       // object size for zoom speed purposes
 		enum viewplane view;
 
 	public:
@@ -22,6 +24,8 @@ class OrthoProjection : public MVPHandler {
 		virtual void processMouse(int button, int state, int x, int y);
 		virtual void processMouseActiveMotion(int x, int y);
 		virtual void processMousePassiveMotion(int x, int y);
+
+		virtual void viewBoundingBox(Go::BoundingBox &box) ;
 
 		void uvAt(int x, int y, double &u, double &v);
 		void setModelView();

@@ -4,6 +4,7 @@
 
 #include "DisplayObject.h"
 #include <GoTools/geometry/SplineSurface.h>
+#include <GoTools/geometry/SplineCurve.h>
 #include <GL/glut.h>
 #include <vector>
 class CurveDisplay;
@@ -35,6 +36,8 @@ class SurfaceDisplay : public DisplayObject {
 
 		void initMouseMasks() ;
 		void setMaskPos(int x, int y, bool value) ;
+
+		void getBoundingBox(Go::BoundingBox &box) const ;
 			
 	
 	private:

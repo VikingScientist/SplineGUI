@@ -5,6 +5,7 @@
 #include "DisplayObject.h"
 #include "PointDisplay.h"
 #include <GoTools/geometry/SplineCurve.h>
+#include <GoTools/utils/BoundingBox.h>
 #include <GL/glut.h>
 #include <vector>
 class CurvePoint;
@@ -38,6 +39,8 @@ class CurveDisplay : public DisplayObject {
 		void paintMouseAreas(float r, float g, float b) ;
 
 		void setLineWidth(int line_width);
+
+		void getBoundingBox(Go::BoundingBox &box) const ;
 			
 	
 	private:

@@ -21,7 +21,7 @@ using namespace std;
 
 // set by trial and error
 static const GLfloat speed_scale_rotate = 0.003;
-static const GLfloat speed_scale_zoom = 0.10;
+static const GLfloat speed_scale_zoom = 0.005; // this is again multiplied by the model size (bounding box)
 static const GLfloat speed_scale_pan = 0.0014;
 
 void Camera::handleResize(int x, int y, int w, int h) {
@@ -44,6 +44,7 @@ Camera::Camera() {
 	look_at_x               = 0;
 	look_at_y               = 0;
 	look_at_z               = 0;
+	size                    = 10;
 	right_mouse_button_down = false;
 	adaptive_tesselation    = false;
 	just_warped             = false;
@@ -66,6 +67,7 @@ Camera::Camera(int x, int y, int w, int h) : MVPHandler(x,y,w,h) {
 	look_at_x               = 0;
 	look_at_y               = 0;
 	look_at_z               = 0;
+	size                    = 10;
 	right_mouse_button_down = false;
 	adaptive_tesselation    = false;
 	just_warped             = false;
@@ -200,7 +202,7 @@ GLfloat Camera::getR() {
 void Camera::setProjection() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, (float)vp_width / (float)vp_height, 1.0, 700.0);
+	gluPerspective(45.0, (float)vp_width / (float)vp_height, size/1000, size*10);
 }
 
 //! \brief sets the GL_MODELVIEW matrix based on camera parameters (plus lighting conditions)
@@ -240,6 +242,26 @@ void Camera::setModelView() {
 
 }
 
+void Camera::viewBoundingBox(Go::BoundingBox &box) {
+	double border = 0.1;
+	double xmin = box.low()[0];
+	double xmax = box.high()[0];
+	double ymin = box.low()[1];
+	double ymax = box.high()[1];
+	double zmin = (box.dimension() > 2) ? box.low()[2]  : 0;
+	double zmax = (box.dimension() > 2) ? box.high()[2] : 0;
+	double dx = (xmax - xmin) ;
+	double dy = (ymax - ymin) ;
+	double dz = (zmax - zmin) ;
+	
+	size      = box.low().dist(box.high());
+	look_at_x = xmin + dx / 2;
+	look_at_y = ymin + dy / 2;
+	look_at_z = zmin + dz / 2;
+	r         = size * 1.2;
+	recalc_pos();
+}
+
 /**********************************************************************************//**
  * \brief Mouse action event (clicking)
  * \param button which mouse button was pressed or released
@@ -272,7 +294,7 @@ void Camera::processMouseActiveMotion(int x, int y) {
 				just_warped = false;
 				y = last_mouse_y;
 			}
-			GLfloat speed_r = -speed_scale_zoom*((float) y-last_mouse_y);
+			GLfloat speed_r = -speed_scale_zoom*size*((float) y-last_mouse_y);
 			rotate(speed_r, 0, 0);
 		} else if(specialKey == GLUT_ACTIVE_SHIFT) {
 			// paning

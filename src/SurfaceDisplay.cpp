@@ -387,3 +387,7 @@ void SurfaceDisplay::setMaskPos(int x, int y, bool value) {
 	xi_buffer[y*width+x] = (value) ? 1.0 : 0.0;
 }
 
+void SurfaceDisplay::getBoundingBox(BoundingBox &box) const { 
+	box = surf->boundingBox();
+}
+
