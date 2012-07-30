@@ -27,6 +27,8 @@ int main(int argc, char** argv) {
 	
 	gui->show();
 
+        delete gui;
+
 	return 0;
 }
 

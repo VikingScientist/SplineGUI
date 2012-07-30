@@ -49,7 +49,7 @@ namespace Workaround_namespace {
 	void updateMouseMasks();
 	void drawScene();
 	void handleResize(int w, int h);
-	void readFile(const char *filename);
+	void readFile(const char *filename, bool data=false);
 	void handleKeypress(unsigned char key, int x, int y);
 	void processMouse(int button, int state, int x, int y);
 	void processMouseActiveMotion(int x, int y);
@@ -73,8 +73,17 @@ class SplineGUI {
 		int next_button_x;
 		int next_button_y;
 		bool controlKeysEnabled;
+
+		int fifo; // the fifo for interactive input
 		
 	public:
+		int ffifo; // file listening to fifo
+
+		~SplineGUI() {
+			close(ffifo);
+			unlink("/tmp/sgui.fifo");
+		}
+
 		// data management
 		DisplayObjectSet *getObjectSet();
 		void addFile(const char *filename);
@@ -119,6 +128,12 @@ class SplineGUI {
 			if(!instance_)
 				instance_ = new SplineGUI();
 			return instance_;
+		}
+
+		static void removeInstance() {
+			if(instance_ != NULL)
+				delete instance_;
+			instance_ = NULL;
 		}
 
 		/*! \brief This shouldn't really be here (in the public section,

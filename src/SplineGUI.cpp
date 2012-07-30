@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
+#include <sstream>
 
 // openGL headers
 #include <GL/glut.h>
@@ -37,6 +38,9 @@
 #include "SplineGUI.h"
 
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 typedef unsigned int uint;
 
@@ -175,23 +179,30 @@ void handleResize(int w, int h) {
 	updateMouseMasks();
 }
 
-void readFile(const char *filename) {
-	ifstream inFile;
+void readFile(const char *filename, bool data) {
+	ifstream iFile;
+	stringstream sstr;
 	ObjectHeader head;
-	inFile.open(filename);
-	if(!inFile.good()) {
+	istream* inFile = &iFile;
+	if (data) {
+		std::string bar = filename;
+		sstr << bar;
+		inFile = &sstr;
+	} else
+		iFile.open(filename);
+	if(!inFile->good()) {
 		cerr << "Error reading input file \"" << filename << "\"" << endl;
 		exit(1);
 	}
 	int patchCount = 0;
-	while(!inFile.eof()) {
+	while(!inFile->eof()) {
 		char *patchName = new char[256];
 		sprintf(patchName, "Patch %d", patchCount++);
-		head.read(inFile);
+		head.read(*inFile);
 		switch(head.classType()) {
 			case Class_SplineCurve: {
 				SplineCurve *c = new SplineCurve();
-				c->read(inFile);
+				c->read(*inFile);
 				CurveDisplay *obj = new CurveDisplay(c);
 				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
@@ -200,7 +211,7 @@ void readFile(const char *filename) {
 			}
 			case Class_SplineSurface: {
 				SplineSurface *s = new SplineSurface();
-				s->read(inFile);
+				s->read(*inFile);
 				SurfaceDisplay *obj = new SurfaceDisplay(s);
 				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
@@ -209,7 +220,7 @@ void readFile(const char *filename) {
 			}
 			case Class_SplineVolume: {
 				SplineVolume *v = new SplineVolume();
-				v->read(inFile);
+				v->read(*inFile);
 				VolumeDisplay *obj = new VolumeDisplay(v);
 				obj->setMeta(patchName);
 				objectSet.addObject((DisplayObject*) obj);
@@ -244,10 +255,10 @@ void readFile(const char *filename) {
 				fprintf(stderr, "File \"%s\" contains unknown or unsupported class object\n", filename);
 				exit(1);
 		}
-		ws(inFile); // eat whitespaces
+		ws(*inFile); // eat whitespaces
 	}
 
-	inFile.close();
+	iFile.close();
 
 	BoundingBox box;
 	objectSet.getBoundingBox(box);
@@ -420,6 +431,20 @@ void hoverTest() {
 		does_hover = true;
 		glutPostRedisplay();
 	}
+
+	// check for data in fifo
+	char buf[16385] = {0};
+	SplineGUI* sgui = SplineGUI::getInstance();
+	int num_bytes; 
+	std::stringstream str;
+	while ((num_bytes = read(sgui->ffifo, buf, 16384)) > 0)
+		str << buf;
+	
+	if (!str.str().empty() > 0) {
+		std::cout << "read " << str.str().size()<< std::endl;
+		sgui->getObjectSet()->clear();
+		readFile(str.str().c_str(),true);
+	}
 }
 
 } // namespace Workaround_namespace
@@ -466,6 +491,9 @@ SplineGUI::SplineGUI() {
 	// set hover start timing 
 	gettimeofday(&last_mouse_move, NULL);
 
+        // open fifo for interactive input
+        fifo = mkfifo("/tmp/sgui.fifo",0644);
+        ffifo = open("/tmp/sgui.fifo",O_RDONLY|O_NONBLOCK);
 }
 
 /**************************************************************//**
