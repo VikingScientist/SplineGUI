@@ -83,6 +83,8 @@ void OrthoProjection::processMouseActiveMotion(int x, int y) {
 			glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 			double du = (x-last_mouse_x)*u_w/vp_width;
 			double dv = (y-last_mouse_y)*v_h/vp_height;
+			if(view == LEFT)
+				du = -du;
 			u0 -= du;
 			v0 -= dv;
 		} else {
