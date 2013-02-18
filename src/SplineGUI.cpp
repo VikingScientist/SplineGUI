@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
+#include <string.h>
 
 // openGL headers
 #include <GL/glut.h>
@@ -31,6 +32,7 @@
 #include "CurveDisplay.h"
 #include "SurfaceDisplay.h"
 #include "VolumeDisplay.h"
+#include "LRVolDisplay.h"
 #include "OrthoProjection.h"
 #include "Button.h"
 #include "TextField.h"
@@ -184,65 +186,83 @@ void readFile(const char *filename) {
 		exit(1);
 	}
 	int patchCount = 0;
+
+
+	// read (multipatch) GoTools object
 	while(!inFile.eof()) {
+		char buffer[512];
+		int pos = inFile.tellg();
+		inFile.getline(buffer, 512); // peek the first line to figure out if it's an LRSpline or a GoTools spline
+		inFile.seekg(pos);
+
 		char *patchName = new char[256];
 		sprintf(patchName, "Patch %d", patchCount++);
-		head.read(inFile);
-		switch(head.classType()) {
-			case Class_SplineCurve: {
-				SplineCurve *c = new SplineCurve();
-				c->read(inFile);
-				CurveDisplay *obj = new CurveDisplay(c);
-				obj->setMeta(patchName);
-				objectSet.addObject((DisplayObject*) obj);
-				cout << "SplineCurve succesfully read" << endl;
-				break;
+
+		if(strncmp(buffer, "# LRSPLINE VOLUME",17)==0) {
+			LR::LRSplineVolume *v = new LR::LRSplineVolume();
+			v->read(inFile);
+			LRVolDisplay *obj = new LRVolDisplay(v);
+			obj->setMeta(patchName);
+			objectSet.addObject((DisplayObject*) obj);
+			cout << "LRSpline volume succesfully read" << endl;
+		} else { 
+			head.read(inFile);
+			switch(head.classType()) {
+				case Class_SplineCurve: {
+					SplineCurve *c = new SplineCurve();
+					c->read(inFile);
+					CurveDisplay *obj = new CurveDisplay(c);
+					obj->setMeta(patchName);
+					objectSet.addObject((DisplayObject*) obj);
+					cout << "SplineCurve succesfully read" << endl;
+					break;
+				}
+				case Class_SplineSurface: {
+					SplineSurface *s = new SplineSurface();
+					s->read(inFile);
+					SurfaceDisplay *obj = new SurfaceDisplay(s);
+					obj->setMeta(patchName);
+					objectSet.addObject((DisplayObject*) obj);
+					cout << "SplineSurface succesfully read" << endl;
+					break;
+				}
+				case Class_SplineVolume: {
+					SplineVolume *v = new SplineVolume();
+					v->read(inFile);
+					VolumeDisplay *obj = new VolumeDisplay(v);
+					obj->setMeta(patchName);
+					objectSet.addObject((DisplayObject*) obj);
+					cout << "SplineVolume succesfully read" << endl;
+					break;
+				}
+				case Class_CurveOnSurface:
+				case Class_Line:
+				case Class_Circle:
+				case Class_BoundedSurface:
+				case Class_GoBaryPolSurface:
+				case Class_GoHBSplineParamSurface:
+				case Class_CompositeSurface:
+				case Class_Plane:
+				case Class_Cylinder:
+				case Class_Sphere:
+				case Class_Cone:
+				case Class_Torus:
+				case Class_Go3dsObject:
+				case Class_GoHeTriang:
+				case Class_GoSdTriang:
+				case Class_GoQuadMesh:
+				case Class_GoHybridMesh:
+				case Class_ParamTriang:
+				case Class_GoVrmlGeometry:
+				case Class_PointCloud:
+				case Class_LineCloud:
+				case Class_GoTriangleSets:
+				case Class_RectGrid:
+				case Class_Unknown:
+				default:
+					fprintf(stderr, "File \"%s\" contains unknown or unsupported class object\n", filename);
+					exit(1);
 			}
-			case Class_SplineSurface: {
-				SplineSurface *s = new SplineSurface();
-				s->read(inFile);
-				SurfaceDisplay *obj = new SurfaceDisplay(s);
-				obj->setMeta(patchName);
-				objectSet.addObject((DisplayObject*) obj);
-				cout << "SplineSurface succesfully read" << endl;
-				break;
-			}
-			case Class_SplineVolume: {
-				SplineVolume *v = new SplineVolume();
-				v->read(inFile);
-				VolumeDisplay *obj = new VolumeDisplay(v);
-				obj->setMeta(patchName);
-				objectSet.addObject((DisplayObject*) obj);
-				cout << "SplineVolume succesfully read" << endl;
-				break;
-			}
-			case Class_CurveOnSurface:
-			case Class_Line:
-			case Class_Circle:
-			case Class_BoundedSurface:
-			case Class_GoBaryPolSurface:
-			case Class_GoHBSplineParamSurface:
-			case Class_CompositeSurface:
-			case Class_Plane:
-			case Class_Cylinder:
-			case Class_Sphere:
-			case Class_Cone:
-			case Class_Torus:
-			case Class_Go3dsObject:
-			case Class_GoHeTriang:
-			case Class_GoSdTriang:
-			case Class_GoQuadMesh:
-			case Class_GoHybridMesh:
-			case Class_ParamTriang:
-			case Class_GoVrmlGeometry:
-			case Class_PointCloud:
-			case Class_LineCloud:
-			case Class_GoTriangleSets:
-			case Class_RectGrid:
-			case Class_Unknown:
-			default:
-				fprintf(stderr, "File \"%s\" contains unknown or unsupported class object\n", filename);
-				exit(1);
 		}
 		ws(inFile); // eat whitespaces
 	}

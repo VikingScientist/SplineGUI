@@ -13,11 +13,18 @@ FIND_PACKAGE(GoTools REQUIRED)
 FIND_PACKAGE(GoTrivariate REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT REQUIRED)
+FIND_PACKAGE(LRSpline REQUIRED)
 FIND_PACKAGE(GPM REQUIRED)
 
 # Required libraries
-SET(DEPLIBS ${GPM_LIBRARIES} ${GoTrivariate_LIBRARIES}
-            ${GoTools_LIBRARIES} ${GLUT_glut_LIBRARY} ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY} 
+SET(DEPLIBS
+  ${GPM_LIBRARIES}
+  ${GoTrivariate_LIBRARIES}
+  ${GoTools_LIBRARIES}
+  ${GLUT_glut_LIBRARY}
+  ${OPENGL_glu_LIBRARY}
+  ${OPENGL_gl_LIBRARY} 
+  ${LRSpline_LIBRARIES}
 )
 
 # Required include directories
@@ -27,6 +34,7 @@ SET(INCLUDES
   ${GLUT_INCLUDE_DIR}
   ${GLU_INCLUDE_PATH}
   ${GPM_INCLUDES}
+  ${LRSpline_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/include
 )
 
@@ -39,6 +47,7 @@ SET(LIBRARY_OUTPUT_PATH lib)
 # 091120: Adding this because GUV-plugins will need it. (J.O.)
 IF(NOT WIN32)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
 ENDIF(NOT WIN32)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GoTools_CXX_FLAGS}")
@@ -59,7 +68,8 @@ FILE(GLOB_RECURSE SplineLIB_SRCS src/Button.cpp
                                  src/TextField.cpp
                                  src/MouseListener.cpp
                                  src/MVPHandler.cpp
-                                 src/VolumeDisplay.cpp)
+                                 src/VolumeDisplay.cpp
+                                 src/LRVolDisplay.cpp)
 ADD_LIBRARY(SplineGUI ${SplineLIB_SRCS})
 TARGET_LINK_LIBRARIES(SplineGUI ${DEPLIBS})
 
