@@ -85,6 +85,9 @@ TARGET_LINK_LIBRARIES(refineGUI SplineGUI ${DEPLIBS})
 ADD_EXECUTABLE(fenrisGUI src/main_gui.cpp)
 TARGET_LINK_LIBRARIES(fenrisGUI SplineGUI ${DEPLIBS})
 
+ADD_EXECUTABLE(viewRes src/main_viewResult.cpp)
+TARGET_LINK_LIBRARIES(viewRes SplineGUI ${DEPLIBS})
+
 # 'install' target
 IF(WIN32)
   # TODO

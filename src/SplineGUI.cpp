@@ -190,6 +190,7 @@ void readFile(const char *filename) {
 
 	// read (multipatch) GoTools object
 	while(!inFile.eof()) {
+		ws(inFile); // eat whitespace
 		char buffer[512];
 		int pos = inFile.tellg();
 		inFile.getline(buffer, 512); // peek the first line to figure out if it's an LRSpline or a GoTools spline
@@ -264,7 +265,6 @@ void readFile(const char *filename) {
 					exit(1);
 			}
 		}
-		ws(inFile); // eat whitespaces
 	}
 
 	inFile.close();
@@ -645,6 +645,18 @@ void SplineGUI::enableControlKeys(bool controlKeysEnabled) {
 
 bool SplineGUI::isControlKeysEnabled() {
 	return controlKeysEnabled;
+}
+
+void SplineGUI::updateBoundingBox() {
+	
+	BoundingBox box;
+
+	objectSet.getBoundingBox(box);
+	cam.viewBoundingBox(box);
+	top_view.viewBoundingBox(box);
+	front_view.viewBoundingBox(box);
+	left_view.viewBoundingBox(box);
+
 }
 
 void SplineGUI::addKeyboardListener(void (*keyListener)(unsigned char)) {

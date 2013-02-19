@@ -97,6 +97,7 @@ class SplineGUI {
 		void addKeyboardListener(void (*handleKeyPress)(unsigned char));
 		void enableControlKeys(bool controlKeysEnabled);
 		bool isControlKeysEnabled() ;
+		void updateBoundingBox();
 
 		// window handling
 		void setSplineColor(float r, float g, float b);

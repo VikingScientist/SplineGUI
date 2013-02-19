@@ -21,7 +21,7 @@ class LRVolDisplay : public DisplayObject {
 
 		LRVolDisplay(LR::LRSplineVolume *volume);
 		~LRVolDisplay();
-		void tesselate(int *n=NULL);
+		virtual void tesselate(int *n=NULL);
 		void paint();
 		void paintSelected();
 		void paintMouseAreas();
@@ -34,7 +34,8 @@ class LRVolDisplay : public DisplayObject {
 		DISPLAY_CLASS_TYPE classType() { return LRVOLUME; }
 		void printDebugInfo();
 		void print(std::ostream *out);
-		void setDrawControlMesh(bool draw); void setColorByParameterValues(bool draw);
+		void setDrawControlMesh(bool draw);
+		void setColorByParameterValues(bool draw);
 		void setSelectedColor(double r, double g, double b);
 		void setColor(double r, double g, double b);
 		void getBoundingBox(Go::BoundingBox &box) const ;
@@ -43,7 +44,7 @@ class LRVolDisplay : public DisplayObject {
 		void setMaskPos(int x, int y, bool value) ;
 		void paintMouseAreas(float r, float g, float b) ;
 	
-	private:
+	protected:
 
 		bool draw_contol_mesh;
 		bool colorByParametervalues;
