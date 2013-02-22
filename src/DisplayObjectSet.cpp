@@ -178,7 +178,7 @@ int DisplayObjectSet::objectAtPosition(int x, int y, int width, int height) {
 
 void DisplayObjectSet::addObject(DisplayObject* obj) {
 	objects.push_back((DisplayObject*) obj);
-	obj->tesselate(default_resolution);
+	// obj->tesselate(default_resolution);
 	for(size_t i=0; i<listeners.size(); i++)
 		obj->addActionListener(listeners[i]);
 	hasNewObjects = true;
@@ -189,6 +189,16 @@ void DisplayObjectSet::clear() {
 	selected.clear();
 	hidden.clear();
 	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
+}
+
+void DisplayObjectSet::setSelected(DisplayObject* sel_obj) {
+	set<DisplayObject*>::iterator sel_it = selected.find(sel_obj);
+	if(sel_it != selected.end())
+		return; // object already selected... do nothing
+	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) 
+		if(*obj == sel_obj) 
+			selected.insert(*obj);
+	fireActionEvent(ACTION_REQUEST_REPAINT);
 }
 
 bool DisplayObjectSet::removeObject(DisplayObject* del_obj) {

@@ -36,11 +36,19 @@ class VolumeDisplay : public DisplayObject {
 		void setColor(double r, double g, double b);
 		void getBoundingBox(Go::BoundingBox &box) const ;
 
+		void addDisplacement(Go::SplineVolume *disp);
+		void addColor(       Go::SplineVolume *col, double min, double max) ;
+
 		void initMouseMasks() ;
 		void setMaskPos(int x, int y, bool value) ;
 		void paintMouseAreas(float r, float g, float b) ;
 	
 	private:
+		
+		Go::SplineVolume *colors;
+		Go::SplineVolume *displacement;
+		double cMax; // color max value
+		double cMin;
 
 		bool draw_contol_mesh;
 		bool colorByParametervalues;

@@ -9,6 +9,8 @@ using namespace std;
 
 VolumeDisplay::VolumeDisplay(SplineVolume *volume) : DisplayObject() {
 	this->volume           = volume;
+	colors                 = NULL;
+	displacement           = NULL;
 	positions              = NULL;
 	normals                = NULL;
 	triangle_strip         = NULL;
@@ -53,6 +55,32 @@ VolumeDisplay::~VolumeDisplay() {
 	if(wallbuffer)     delete[] wallbuffer;
 	if(cp_pos)         delete[] cp_pos;
 	if(cp_lines)       delete[] cp_lines;
+	if(displacement)   delete   displacement;
+	if(colors)         delete   colors;
+}
+
+void VolumeDisplay::addDisplacement(Go::SplineVolume *disp) {
+	displacement = disp;
+
+	vector<SurfacePointer > edges = displacement->getBoundarySurfaces(true);
+	edges[1]->reverseParameterDirection(true);
+	edges[2]->reverseParameterDirection(true);
+	edges[5]->reverseParameterDirection(true);
+	for(int i=0; i<6; i++)
+		walls[i]->addDisplacement(edges[i]->clone());
+}
+
+void VolumeDisplay::addColor(Go::SplineVolume *col, double min, double max)  {
+	colors = col;
+	cMin   = min;
+	cMax   = max;
+	
+	vector<SurfacePointer > edges = colors->getBoundarySurfaces(true);
+	edges[1]->reverseParameterDirection(true);
+	edges[2]->reverseParameterDirection(true);
+	edges[5]->reverseParameterDirection(true);
+	for(int i=0; i<6; i++)
+		walls[i]->addColor(edges[i]->clone(), cMin, cMax);
 }
 
 void VolumeDisplay::setSelectedColor(double r, double g, double b) {

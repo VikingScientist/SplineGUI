@@ -189,8 +189,8 @@ void readFile(const char *filename) {
 
 
 	// read (multipatch) GoTools object
+	ws(inFile); // eat whitespace
 	while(!inFile.eof()) {
-		ws(inFile); // eat whitespace
 		char buffer[512];
 		int pos = inFile.tellg();
 		inFile.getline(buffer, 512); // peek the first line to figure out if it's an LRSpline or a GoTools spline
@@ -265,6 +265,7 @@ void readFile(const char *filename) {
 					exit(1);
 			}
 		}
+		ws(inFile); // eat whitespace
 	}
 
 	inFile.close();

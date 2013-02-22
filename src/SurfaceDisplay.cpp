@@ -7,8 +7,11 @@
 using namespace Go;
 using namespace std;
 
+
 SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) : DisplayObject() {
 	this->surf             = surf;
+	colors                 = NULL;
+	displacement           = NULL;
 	positions              = NULL;
 	normals                = NULL;
 	triangle_strip         = NULL;
@@ -57,6 +60,8 @@ SurfaceDisplay::~SurfaceDisplay() {
 	if(eta_buffer)     delete[] eta_buffer;
 	if(cp_pos)         delete[] cp_pos;
 	if(cp_lines)       delete[] cp_lines;
+	if(displacement)   delete   displacement;
+	if(colors)         delete   colors;
 }
 
 void SurfaceDisplay::setFaceIndex(int i) {
@@ -76,6 +81,8 @@ void SurfaceDisplay::tesselate(int *n) {
 	double p_v_min = surf->startparam_v();
 	double p_v_max = surf->endparam_v();
 	vector<double> pts;
+	vector<double> disp;
+	vector<double> col;
 	vector<double> normals_evaluated;
 	vector<double> param_u;
 	vector<double> param_v;
@@ -97,6 +104,10 @@ void SurfaceDisplay::tesselate(int *n) {
 		surf->gridEvaluator(n[0], n[1], pts, normals_evaluated, param_u, param_v, false);
 	else 
 		surf->gridEvaluator(n[0], n[1], pts, param_u, param_v);
+	if(displacement)
+		displacement->gridEvaluator(n[0], n[1], disp, param_u, param_v);
+	if(colors)
+		colors->gridEvaluator(n[0], n[1], col, param_u, param_v);
 
 	// store the number of the different primitives
 	int nCoef[2];
@@ -153,12 +164,37 @@ void SurfaceDisplay::tesselate(int *n) {
 		}
 	}
 
+	if(colors) {
+		int k=0;
+		for(int j=0; j<n[1]; j++) {
+			for(int i=0; i<n[0]; i++, k++) {
+				HSVType hue;
+				hue.H = 4.0 - (col[k] - cMin) / (cMax-cMin) * 4.0;
+				hue.S = 1.0;
+				hue.V = 1.0;
+				RGBType c = HSV_to_RGB(hue);
+
+				param_values[3*k  ] = c.R;
+				param_values[3*k+1] = c.G;
+				param_values[3*k+2] = c.B;
+				// param_values[3*k  ] = c.R;
+				// param_values[3*k+1] = c.G;
+				// param_values[3*k+2] = c.B;
+			}
+		}
+	}
+
 	// store the actual geometric data points
 	k = 0;
 	for(int j=0; j<n[1]; j++)
 		for(int i=0; i<n[0]; i++)
-			for(int d=0; d<dim; d++, k++)
-				positions[k] = pts[k];
+			for(int d=0; d<dim; d++, k++) {
+				if(displacement) 
+					positions[k] = pts[k] + disp[k];
+				else
+					positions[k] = pts[k];
+	}
+
 	k = 0;
 	for(int j=0; j<n[1]; j++)
 		for(int i=0; i<n[0]; i++)

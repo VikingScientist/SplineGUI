@@ -69,6 +69,7 @@ FILE(GLOB_RECURSE SplineLIB_SRCS src/Button.cpp
                                  src/MouseListener.cpp
                                  src/MVPHandler.cpp
                                  src/VolumeDisplay.cpp
+                                 src/Color.cpp
                                  src/LRVolDisplay.cpp)
 ADD_LIBRARY(SplineGUI ${SplineLIB_SRCS})
 TARGET_LINK_LIBRARIES(SplineGUI ${DEPLIBS})

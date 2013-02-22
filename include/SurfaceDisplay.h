@@ -2,11 +2,13 @@
 #ifndef _SURFACE_DISPLAY_H
 #define _SURFACE_DISPLAY_H
 
+#include "Color.h"
 #include "DisplayObject.h"
 #include <GoTools/geometry/SplineSurface.h>
 #include <GoTools/geometry/SplineCurve.h>
 #include <GL/glut.h>
 #include <vector>
+
 class CurveDisplay;
 
 class SurfaceDisplay : public DisplayObject {
@@ -33,6 +35,12 @@ class SurfaceDisplay : public DisplayObject {
 		void print(std::ostream *out);
 		void setDrawControlMesh(bool draw);
 		void setColorByParameterValues(bool draw);
+		void addDisplacement(Go::SplineSurface *disp) { displacement = disp; };
+		void addColor(       Go::SplineSurface *col, double min, double max)  {
+			colors = col;
+			cMin   = min;
+			cMax   = max;
+		};
 
 		void initMouseMasks() ;
 		void setMaskPos(int x, int y, bool value) ;
@@ -41,6 +49,10 @@ class SurfaceDisplay : public DisplayObject {
 			
 	
 	private:
+		Go::SplineSurface *colors;
+		Go::SplineSurface *displacement;
+		double cMax; // color max value
+		double cMin;
 
 		bool draw_contol_mesh;
 		bool colorByParametervalues;

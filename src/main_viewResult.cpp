@@ -15,12 +15,14 @@
 
 #include "DisplayObjectSet.h"
 #include "SplineGUI.h"
+#include "LRSpline/Element.h"
 #include "LRVolDisplay.h"
 #include "VolumeDisplay.h"
 #include "SurfaceDisplay.h"
 #include "CurveDisplay.h"
 #include "PointDisplay.h"
 #include "Button.h"
+// #include "Color.h"
 #include "TextField.h"
 
 #include <GoTools/trivariate/SplineVolume.h>
@@ -35,50 +37,6 @@ using namespace LR;
 // using std::shared_ptr;
 // using namespace Go;
 
-// copy-paste some color-manipulation tools from a random webpage
-#define RETURN_HSV(h, s, v) {HSV.H = h; HSV.S = s; HSV.V = v; return HSV;}
-#define RETURN_RGB(r, g, b) {RGB.R = r; RGB.G = g; RGB.B = b; return RGB;}
-#define UNDEFINED -1 
-typedef struct {float R, G, B;} RGBType;
-typedef struct {float H, S, V;} HSVType; 
-HSVType RGB_to_HSV( RGBType RGB ) {
-	// RGB are each on [0, 1]. S and V are returned on [0, 1] and H is
-	// returned on [0, 6]. Exception: H is returned UNDEFINED if S==0.
-	float R = RGB.R, G = RGB.G, B = RGB.B, v, x, f;
-	int i;
-	HSVType HSV;
-	
-	x = min(min(R,G),B);
-	v = max(max(R,G),B);
-	if(v == x) RETURN_HSV(UNDEFINED, 0, v);
-	f = (R == x) ? G - B : ((G == x) ? B - R : R - G);
-	i = (R == x) ? 3 : ((G == x) ? 5 : 1);
-	RETURN_HSV(i - f /(v - x), (v - x)/v, v);
-}
-RGBType HSV_to_RGB( HSVType HSV ) {
-	// H is given on [0, 6] or UNDEFINED. S and V are given on [0, 1].
-	// RGB are each returned on [0, 1].
-	float h = HSV.H, s = HSV.S, v = HSV.V, m, n, f;
-	int i;
-	RGBType RGB;
-	
-	if (h == UNDEFINED) RETURN_RGB(v, v, v);
-	i = floor(h);
-	f = h - i;
-	if ( !(i&1) ) f = 1 - f; // if i is even
-	m = v * (1 - s);
-	n = v * (1 - s * f);
-	switch (i) {
-		case 6:
-		case 0: RETURN_RGB(v, n, m);
-		case 1: RETURN_RGB(n, v, m);
-		case 2: RETURN_RGB(m, v, n)
-		case 3: RETURN_RGB(m, n, v);
-		case 4: RETURN_RGB(n, m, v);
-		case 5: RETURN_RGB(v, m, n);
-	}
-	RETURN_RGB(0,0,0); // should never reach here, but compiler complains
-} 
 
 class LRguy : public LRVolDisplay {
 
@@ -89,22 +47,147 @@ public:
 		LRVolDisplay::tesselate(n);
 		cout << "LRguy tesselate" << std::endl;
 	}
-	void setColor(vector<double> norm) {
+
+	void setColor(vector<double> norm, double *limits=NULL) {
 		double cmax = DBL_MIN;
 		double cmin = DBL_MAX;
-		for(double d : norm) {
-			cmax = max(cmax, d);
-			cmin = min(cmin, d);
+		if(limits != NULL) {
+			cmin = limits[0];
+			cmax = limits[1];
+		} else {
+			for(double d : norm) {
+				cmax = max(cmax, d);
+				cmin = min(cmin, d);
+			}
 		}
 		int i=0;
-		for(VolumeDisplay *v : bezierVols) {
+		int iel = -1;
+		for(Element *el : volume->getAllElements()) {
+			iel++;
+			if(el->getParmin(0) != volume->startparam(0) && 
+			   el->getParmin(1) != volume->startparam(1) && 
+			   el->getParmin(2) != volume->startparam(2) && 
+			   el->getParmax(0) != volume->endparam(0)  && 
+			   el->getParmax(1) != volume->endparam(1)  && 
+			   el->getParmax(2) != volume->endparam(2) )
+				continue;
 			HSVType hue;
- 			// max = 0 hue (red), min = 5.5 hue (blue
-			hue.H = 5.5 - (norm[i++] - cmin) / (cmax-cmin) * 5.5;
+ 			// max = 0 hue (red), min = 5.0 hue (blue
+			hue.H = 4.0 - (norm[iel] - cmin) / (cmax-cmin) * 4.0;
 			hue.S = 1.0;
 			hue.V = 1.0;
 			RGBType col = HSV_to_RGB(hue);
-			v->setColor(col.R, col.G, col.B);
+			bezierVols[i++]->setColor(col.R, col.G, col.B);
+		}
+	}
+
+	void displace(vector<double> &result, double scale) {
+
+		int p1 = volume->order(0);
+		int p2 = volume->order(1);
+		int p3 = volume->order(2);
+		vector<double> knot1(2*p1);
+		vector<double> knot2(2*p2);
+		vector<double> knot3(2*p3);
+		for(int i=0; i<p1; i++) knot1[ i  ] = 0.0;
+		for(int i=0; i<p1; i++) knot1[p1+i] = 1.0;
+		for(int i=0; i<p2; i++) knot2[ i  ] = 0.0;
+		for(int i=0; i<p2; i++) knot2[p2+i] = 1.0;
+		for(int i=0; i<p3; i++) knot3[ i  ] = 0.0;
+		for(int i=0; i<p3; i++) knot3[p3+i] = 1.0;
+
+		int iel = -1;
+		int i=0;
+		for(Element *el : volume->getAllElements()) {
+			iel++;
+			if(el->getParmin(0) != volume->startparam(0) && 
+			   el->getParmin(1) != volume->startparam(1) && 
+			   el->getParmin(2) != volume->startparam(2) && 
+			   el->getParmax(0) != volume->endparam(0)  && 
+			   el->getParmax(1) != volume->endparam(1)  && 
+			   el->getParmax(2) != volume->endparam(2) )
+				continue;
+			vector<double> C;
+			vector<double> coefs(3*p1*p2*p3,0);
+			vector<int> ind;
+			int width  = p1*p2*p3;
+			int height = el->nBasisFunctions();
+			for(Basisfunction *b : el->support())
+				ind.push_back(b->getId());
+
+			volume->getBezierExtraction(iel, C);
+			int k=0;
+			for(int col=0; col<width; col++) 
+				for(int row=0; row<height; row++,k++) 
+					for(int d=0; d<3; d++) 
+						coefs[3*col+d] += C[k] * result[3*ind[row]+d] * scale;
+
+			
+			Go::SplineVolume *oneDisp = new Go::SplineVolume(p1, p2, p3,
+		                                        	         p1, p2, p3,
+		                                        	         knot1.begin(), knot2.begin(), knot3.begin(),
+		                                        	         coefs.begin(), 3, false);
+			bezierVols[i++]->addDisplacement(oneDisp);
+		}
+	}
+
+	void colorPrimRes(vector<double> &result, double *limits=NULL) {
+		double cmax = DBL_MIN;
+		double cmin = DBL_MAX;
+		if(limits != NULL) {
+			cmin = limits[0];
+			cmax = limits[1];
+		} else {
+			for(double d : result) {
+				cmax = max(cmax, d);
+				cmin = min(cmin, d);
+			}
+		}
+
+		int p1 = volume->order(0);
+		int p2 = volume->order(1);
+		int p3 = volume->order(2);
+		vector<double> knot1(2*p1);
+		vector<double> knot2(2*p2);
+		vector<double> knot3(2*p3);
+		for(int i=0; i<p1; i++) knot1[ i  ] = 0.0;
+		for(int i=0; i<p1; i++) knot1[p1+i] = 1.0;
+		for(int i=0; i<p2; i++) knot2[ i  ] = 0.0;
+		for(int i=0; i<p2; i++) knot2[p2+i] = 1.0;
+		for(int i=0; i<p3; i++) knot3[ i  ] = 0.0;
+		for(int i=0; i<p3; i++) knot3[p3+i] = 1.0;
+
+		int iel = -1;
+		int i=0;
+		for(Element *el : volume->getAllElements()) {
+			iel++;
+			if(el->getParmin(0) != volume->startparam(0) && 
+			   el->getParmin(1) != volume->startparam(1) && 
+			   el->getParmin(2) != volume->startparam(2) && 
+			   el->getParmax(0) != volume->endparam(0)  && 
+			   el->getParmax(1) != volume->endparam(1)  && 
+			   el->getParmax(2) != volume->endparam(2) )
+				continue;
+			vector<double> C;
+			vector<double> coefs(p1*p2*p3,0);
+			vector<int> ind;
+			int width  = p1*p2*p3;
+			int height = el->nBasisFunctions();
+			for(Basisfunction *b : el->support())
+				ind.push_back(b->getId());
+
+			volume->getBezierExtraction(iel, C);
+			int k=0;
+			for(int col=0; col<width; col++) 
+				for(int row=0; row<height; row++) 
+					coefs[col] += C[k++] * result[ind[row]];
+
+			
+			Go::SplineVolume *oneCol = new Go::SplineVolume(p1, p2, p3,
+		                                        	        p1, p2, p3,
+		                                        	        knot1.begin(), knot2.begin(), knot3.begin(),
+		                                        	        coefs.begin(), 1, false);
+			bezierVols[i++]->addColor(oneCol, cmin, cmax);
 		}
 	}
 	
@@ -122,6 +205,7 @@ int iteration = 0;
 DisplayObjectSet* objects; 
 vector<LRguy*>    geometry;
 vector<vector<double> >   norms;
+vector<vector<double> >   primSol;
 vector<vector<double> >   displace;
 
 void readNorm(const char *filename) {
@@ -132,14 +216,71 @@ void readNorm(const char *filename) {
 		exit(1);
 	}
 
+	double cmax = DBL_MIN;
+	double cmin = DBL_MAX;
 	for(int i=0; i<geometry.size(); i++) {
 		ws(inFile);
 		int nEl = geometry[i]->volume->nElements();
 		norms.push_back(vector<double>(nEl));
-		for(int j=0; j<nEl; j++) 
+		for(int j=0; j<nEl; j++)  {
 			inFile >> norms[i][j];
-		geometry[i]->setColor(norms[i]);
+			cmax = max(cmax, norms[i][j]);
+			cmin = min(cmin, norms[i][j]);
+		}
 	}
+	double limits[] = {cmin,cmax};
+	for(int i=0; i<geometry.size(); i++)
+		geometry[i]->setColor(norms[i]);
+
+	inFile.close();
+}
+
+void readDispl(const char *filename, double scale) {
+	ifstream inFile;
+	inFile.open(filename);
+	if(!inFile.good()) {
+		cerr << "Error reading input file \"" << filename << "\"" << endl;
+		exit(1);
+	}
+
+	double cmax = DBL_MIN;
+	double cmin = DBL_MAX;
+	for(int i=0; i<geometry.size(); i++) {
+		ws(inFile);
+		int nBasis = geometry[i]->volume->nBasisFunctions();
+		displace.push_back(vector<double>(3*nBasis));
+		for(int j=0; j<3*nBasis; j++) 
+			inFile >> displace[i][j];
+		geometry[i]->displace(displace[i], scale);
+	}
+
+	inFile.close();
+}
+
+void readPrimCol(const char *filename) {
+	ifstream inFile;
+	inFile.open(filename);
+	if(!inFile.good()) {
+		cerr << "Error reading input file \"" << filename << "\"" << endl;
+		exit(1);
+	}
+
+	double cmax = DBL_MIN;
+	double cmin = DBL_MAX;
+	for(int i=0; i<geometry.size(); i++) {
+		ws(inFile);
+		int nBasis = geometry[i]->volume->nBasisFunctions();
+		primSol.push_back(vector<double>(nBasis));
+		for(int j=0; j<nBasis; j++)  {
+			inFile >> primSol[i][j];
+			primSol[i][j] = fabs(primSol[i][j]);
+			cmax = max(cmax, primSol[i][j]);
+			cmin = min(cmin, primSol[i][j]);
+		}
+	}
+	double limits[] = {cmin,cmax};
+	for(int i=0; i<geometry.size(); i++)
+		geometry[i]->colorPrimRes(primSol[i]);
 
 	inFile.close();
 }
@@ -169,6 +310,7 @@ void readFile(const char *filename) {
 			v->read(inFile);
 			LRguy *obj = new LRguy(v);
 			obj->setMeta(patchName);
+			obj->setColorByParameterValues(true);
 			geometry.push_back( obj );
 			cout << "LRSpline volume succesfully read" << endl;
 		} else { 
@@ -177,6 +319,7 @@ void readFile(const char *filename) {
 		}
 	}
 	objects->addObject( geometry[0] );
+	objects->setSelected( geometry[0] );
 	inFile.close();
 	
 	SplineGUI *gui = SplineGUI::getInstance();
@@ -187,8 +330,15 @@ void readFile(const char *filename) {
 
 void processParameters(int argc, char** argv) {
 
+	double scale = atof(argv[5]);
 	readFile(argv[1]);
 	readNorm(argv[2]);
+	readPrimCol(argv[3]);
+	readDispl(argv[4], scale);
+
+	int res[] = {4,4,4};
+	for(LRguy *v : geometry)
+		v->tesselate(res);
 
 }
 
@@ -202,6 +352,7 @@ void keyClick(unsigned char key) {
 
 	objects->removeObject(geometry[iteration]);
 	objects->addObject(geometry[newIter]);
+	objects->setSelected(geometry[newIter]);
 	iteration = newIter;
 }
 
