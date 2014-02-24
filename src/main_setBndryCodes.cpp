@@ -303,7 +303,6 @@ void readPropertyCodesFromStdin() {
 		}
 		colorPrimitive(patch, type, locIndex, iCode, code);
 		ws(cin); // eat whitespace
-		code = new char[1024];
 	}
 }
 
