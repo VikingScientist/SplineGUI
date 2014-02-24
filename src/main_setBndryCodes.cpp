@@ -28,6 +28,9 @@
 #include <GoTools/geometry/SplineCurve.h>
 #include <GoTools/utils/Point.h>
 
+#include "tinyxml.h"
+#include <map>
+
 typedef unsigned int uint;
 
 using namespace std;
@@ -271,11 +274,74 @@ void colorPrimitive(int patch, DISPLAY_CLASS_TYPE type, int locIndex, int iCode,
 	}
 }
 
+void readXMLPropertyCodesFromStdin()
+{
+  TiXmlDocument doc;
+  cin >> doc;
+
+  TiXmlElement* elem;
+  if (doc.FirstChildElement("simulation")) {
+    elem = doc.FirstChildElement("simulation")->FirstChildElement("geometry");
+    if (elem)
+      elem = elem->FirstChildElement("topologysets");
+  } else if (doc.FirstChildElement("geometry")) {
+    elem = doc.FirstChildElement("geometry")->FirstChildElement("topologysets");
+  } else
+    elem = doc.FirstChildElement("topologysets");
+
+  if (!elem)
+    return;
+
+  elem = elem->FirstChildElement("set");
+  std::map<std::string, int> topsets;
+  int code=1;
+  while (elem) {
+    std::string name = elem->Attribute("name");
+    if (topsets.find(name) == topsets.end()) {
+      topsets[name] = code++;
+      boundaryTags.push_back(strdup(name.c_str())); 
+    }
+    std::string type = elem->Attribute("type");
+    TiXmlElement* item = elem->FirstChildElement("item");
+    while (item) {
+      int patch = atoi(item->Attribute("patch"));
+      char* entities = strdup(item->FirstChild()->Value());
+      char* entity = strtok(entities," ");
+      DISPLAY_CLASS_TYPE primtype;
+      while (entity) {
+        int ent = atoi(entity)-1;
+        if (type == "face") {
+          model.addFacePropertyCode(patch-1, ent, boundaryTags[topsets[name]-1], false);
+          primtype = SURFACE;
+        }
+        if (type == "edge") {
+          model.addLinePropertyCode(patch-1, ent, boundaryTags[topsets[name]-1], false);
+          primtype = CURVE;
+        }
+        if (type == "vertex") {
+          model.addVertexPropertyCode(patch-1, ent, boundaryTags[topsets[name]-1]);
+          primtype = POINT;
+        }
+        colorPrimitive(patch-1, primtype, ent, topsets[name], boundaryTags[topsets[name]-1]);
+        entity = strtok(NULL," ");
+      }
+      free(entities);
+      item = item->NextSiblingElement("item");
+    }
+    elem = elem->NextSiblingElement("set");
+  }
+}
+
+
 void readPropertyCodesFromStdin() {
 	int patch, primitive, locIndex;
 	int iCode = 0;
 	char *code = new char[1024];
 	while( cin.getline(code, 1024) ) {
+    if (strncasecmp(code, "<?xml", 5) == 0) {
+      readXMLPropertyCodesFromStdin();
+      return;
+    }
 		DISPLAY_CLASS_TYPE type;
 		cin >> patch;
 		cin >> primitive;

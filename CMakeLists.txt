@@ -14,10 +14,13 @@ FIND_PACKAGE(GoTrivariate REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT REQUIRED)
 FIND_PACKAGE(GPM REQUIRED)
+find_package(TinyXML REQUIRED)
 
 # Required libraries
 SET(DEPLIBS ${GPM_LIBRARIES} ${GoTrivariate_LIBRARIES}
-            ${GoTools_LIBRARIES} ${GLUT_glut_LIBRARY} ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY} 
+            ${GoTools_LIBRARIES} ${GLUT_glut_LIBRARY}
+            ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY}
+            ${TINYXML_LIBRARIES}
 )
 
 # Required include directories
@@ -27,6 +30,7 @@ SET(INCLUDES
   ${GLUT_INCLUDE_DIR}
   ${GLU_INCLUDE_PATH}
   ${GPM_INCLUDES}
+  ${TINYXML_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/include
 )
 
