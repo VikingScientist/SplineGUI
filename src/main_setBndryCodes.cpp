@@ -307,7 +307,7 @@ void readPropertyCodesFromStdin() {
 }
 
 void dumpOutput() {
-	model.writeModelProperties(std::cout);
+	model.writeModelXMLProperties(std::cout);
 }
 
 
