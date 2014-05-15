@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
+#include <unistd.h>
 
 #include "DisplayObjectSet.h"
 #include "SplineGUI.h"
