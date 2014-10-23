@@ -552,6 +552,7 @@ int main(int argc, char **argv) {
 		Volume *vol = *volIt;
 		gui->addObject(volumes[vol->id].get());
 	}
+	gui->computeBoundingBox();
 
 	DisplayObjectSet *objSet = gui->getObjectSet();
 	objSet->enableControlMesh(false);

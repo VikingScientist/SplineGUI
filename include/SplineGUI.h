@@ -102,6 +102,7 @@ class SplineGUI {
 		void setSplineColor(float r, float g, float b);
 		void setSize(int width, int height);
 		void show();
+		void computeBoundingBox();
 
 		/***************************************************//**
 		 \brief get SplineGUI instance

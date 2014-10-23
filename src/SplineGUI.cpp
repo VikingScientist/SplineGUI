@@ -249,12 +249,8 @@ void readFile(const char *filename) {
 
 	inFile.close();
 
-	BoundingBox box;
-	objectSet.getBoundingBox(box);
-	cam.viewBoundingBox(box);
-	top_view.viewBoundingBox(box);
-	front_view.viewBoundingBox(box);
-	left_view.viewBoundingBox(box);
+	SplineGUI *gui = SplineGUI::getInstance();
+	gui->computeBoundingBox();
 }
 
 void handleKeypress(unsigned char key, int x, int y) {
@@ -616,6 +612,16 @@ void SplineGUI::removeTextField(TextField *tf) {
 	}
 	delete tf;
 }
+
+void SplineGUI::computeBoundingBox() {
+	BoundingBox box;
+	objectSet.getBoundingBox(box);
+	cam.viewBoundingBox(box);
+	top_view.viewBoundingBox(box);
+	front_view.viewBoundingBox(box);
+	left_view.viewBoundingBox(box);
+}
+
 
 //! \brief true if GUI should interpet special key-characters (c,q,space etc) as view control
 //!        false if these are to be ignored (i.e. only passed to key listeners)
