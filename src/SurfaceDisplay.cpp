@@ -20,6 +20,7 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) : DisplayObject(
 	resolution[0]          = 0;
 	resolution[1]          = 0;
 	draw_contol_mesh       = false;
+	draw_meshlines         = true;
 	colorByParametervalues = false;
 	faceIndex              = -1;
 	dim                    = surf->dimension();
@@ -238,8 +239,9 @@ void SurfaceDisplay::paint() {
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisable(GL_LIGHTING);
 	
-		for(uint i=0; i<knot_lines.size(); i++)
-			knot_lines[i]->paint();
+		if(draw_meshlines)
+			for(uint i=0; i<knot_lines.size(); i++)
+				knot_lines[i]->paint();
 	}
 }
 
@@ -259,8 +261,9 @@ void SurfaceDisplay::paintSelected() {
 	if(colorByParametervalues)
 		glDisableClientState(GL_COLOR_ARRAY);
 
-	for(uint i=0; i<knot_lines.size(); i++)
-		knot_lines[i]->paint();
+	if(draw_meshlines)
+		for(uint i=0; i<knot_lines.size(); i++)
+			knot_lines[i]->paint();
 }
 
 void SurfaceDisplay::paintMouseAreas() {
@@ -299,6 +302,10 @@ double* SurfaceDisplay::parValueAtPosition(int x, int y) {
 
 void SurfaceDisplay::setDrawControlMesh(bool draw) {
 	draw_contol_mesh = draw;
+}
+
+void SurfaceDisplay::setDrawMeshlines(bool draw) {
+	draw_meshlines = draw;
 }
 
 void SurfaceDisplay::setColorByParameterValues(bool draw) {

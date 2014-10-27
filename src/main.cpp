@@ -13,6 +13,8 @@
 #include <string.h>
 #include <iostream>
 
+typedef std::vector<DisplayObject*>::iterator objIterator;
+
 bool isInt(char* str) {
 	while(*str != 0) {
 		if(*str < '0' || *str > '9')
@@ -27,6 +29,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	vector<int> customTesselation;
+	bool hideline = false;
 
 	SplineGUI *gui = SplineGUI::getInstance();
 	for(int argi=1; argi<argc; argi++) {
@@ -35,8 +38,11 @@ int main(int argc, char** argv) {
 				cout << argv[0] << " [-flags] inputFile(s)" << endl;
 				cout << "  Flags:" << endl;
 				cout << "    -help:     displays this help screen"   << endl;
+				cout << "    -noline:   hide all surface meshlines" << endl;
 				cout << "    -res <n>:  tesselation resolution of n" << endl;
 				exit(0);
+			} else if(!strcmp(argv[argi]+1, "noline")) {
+				hideline = true;
 			} else if(!strcmp(argv[argi]+1, "res")) {
 				if( argi+1<argc &&  isInt(argv[argi+1] ))
 					customTesselation.push_back(atoi(argv[++argi]));
@@ -56,14 +62,20 @@ int main(int argc, char** argv) {
 
 	// could actually type gui->show() here and be done with it
 	// but we'll add some usability by adding parametric coloring
-	gui->getObjectSet()->colorSelectedByParameterValues(true);
+	DisplayObjectSet* objSet = gui->getObjectSet();
+	objSet->colorSelectedByParameterValues(true);
 	
 	if(customTesselation.size() > 0) {
 		while(customTesselation.size()<3)
 			customTesselation.push_back(customTesselation.back());
 		
-		gui->getObjectSet()->tesselateAll(&(customTesselation[0]));
+		objSet->tesselateAll(&(customTesselation[0]));
 	}
+	if(hideline)
+		for(objIterator obj=objSet->objects_begin(); obj != objSet->objects_end(); obj++)
+			if((*obj)->classType() == SURFACE)
+				((SurfaceDisplay*) *obj)->setDrawMeshlines(false);
+
 	gui->show();
 
 	return 0;

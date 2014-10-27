@@ -32,6 +32,7 @@ class SurfaceDisplay : public DisplayObject {
 		void printDebugInfo();
 		void print(std::ostream *out);
 		void setDrawControlMesh(bool draw);
+		void setDrawMeshlines(bool draw) ;
 		void setColorByParameterValues(bool draw);
 
 		void initMouseMasks() ;
@@ -43,6 +44,7 @@ class SurfaceDisplay : public DisplayObject {
 	private:
 
 		bool draw_contol_mesh;
+		bool draw_meshlines;
 		bool colorByParametervalues;
 		int resolution[2];
 		int triangle_count;
