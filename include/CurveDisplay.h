@@ -18,32 +18,32 @@ class CurveDisplay : public DisplayObject {
 		Go::SplineCurve *curve;
 
 		CurveDisplay(Go::SplineCurve *curve, bool clean=false);
-		~CurveDisplay();
-		void reTesselate();
-		void tesselate(int *n=NULL);
-		void paint();
-		void paintSelected();
-		void paintMouseAreas();
-		void readMouseAreas();
-		bool isAtPosition(int x, int y);
-		double parValueAtPosition(int x, int y);
-		bool splitPeriodicCurveInFour(std::vector<CurvePoint*> splits, std::vector<Go::SplineCurve*> &ret_val);
-		void processMouse(int button, int state, int x, int y);
-		void processMouseActiveMotion(int x, int y);
-		void processMousePassiveMotion(int x, int y);
-		DISPLAY_CLASS_TYPE classType() { return CURVE; }
-		void printDebugInfo();
-		void print(std::ostream *out);
-		void initMouseMasks();
-		void setMaskPos(int x, int y, bool value);
-		void paintMouseAreas(float r, float g, float b) ;
+		virtual ~CurveDisplay();
+		virtual void reTesselate();
+		virtual void tesselate(int *n=NULL);
+		virtual void paint();
+		virtual void paintSelected();
+		virtual void paintMouseAreas();
+		virtual void readMouseAreas();
+		virtual bool isAtPosition(int x, int y);
+		virtual double parValueAtPosition(int x, int y);
+		virtual bool splitPeriodicCurveInFour(std::vector<CurvePoint*> splits, std::vector<Go::SplineCurve*> &ret_val);
+		virtual void processMouse(int button, int state, int x, int y);
+		virtual void processMouseActiveMotion(int x, int y);
+		virtual void processMousePassiveMotion(int x, int y);
+		virtual DISPLAY_CLASS_TYPE classType() { return CURVE; }
+		virtual void printDebugInfo();
+		virtual void print(std::ostream *out);
+		virtual void initMouseMasks();
+		virtual void setMaskPos(int x, int y, bool value);
+		virtual void paintMouseAreas(float r, float g, float b) ;
 
-		void setLineWidth(int line_width);
+		virtual void setLineWidth(int line_width);
 
-		void getBoundingBox(Go::BoundingBox &box) const ;
+		virtual void getBoundingBox(Go::BoundingBox &box) const ;
 			
 	
-	private:
+	protected:
 
 		int resolution;
 		int width;

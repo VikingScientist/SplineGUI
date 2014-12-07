@@ -1,8 +1,19 @@
 PROJECT(SplineGUI)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+SET(SplineGUI_VERSION_MAJOR 1)
+SET(SplineGUI_VERSION_MINOR 0)
+SET(SplineGUI_VERSION_PATCH 0)
+SET(SplineGUI_VERSION ${SplineGUI_VERSION_MAJOR}.${SplineGUI_VERSION_MINOR}.${SplineGUI_VERSION_PATCH})
+
+# Generate header with version info
+CONFIGURE_FILE(include/SplineGUI_version.h.in
+               ${CMAKE_BINARY_DIR}/include/SplineGUI_version.h @ONLY)
 
 ENABLE_LANGUAGE(CXX)
+
+INCLUDE(CheckCXXCompilerFlag)
+INCLUDE(cmake/Modules/UseMultiArch.cmake)
 
 # Add local modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
@@ -15,6 +26,9 @@ FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT REQUIRED)
 FIND_PACKAGE(GPM REQUIRED)
 find_package(TinyXML REQUIRED)
+
+CONFIGURE_FILE(cmake/Templates/SplineGUIConfig.cmake.in
+               SplineGUIConfig.cmake @ONLY)
 
 # Required libraries
 SET(DEPLIBS ${GPM_LIBRARIES} ${GoTrivariate_LIBRARIES}
@@ -66,8 +80,10 @@ FILE(GLOB_RECURSE SplineLIB_SRCS src/Button.cpp
                                  src/MouseListener.cpp
                                  src/MVPHandler.cpp
                                  src/VolumeDisplay.cpp)
-ADD_LIBRARY(SplineGUI ${SplineLIB_SRCS})
+ADD_LIBRARY(SplineGUI SHARED ${SplineLIB_SRCS})
 TARGET_LINK_LIBRARIES(SplineGUI ${DEPLIBS})
+SET_TARGET_PROPERTIES(SplineGUI PROPERTIES  VERSION ${SplineGUI_VERSION}
+                      SOVERSION ${SplineGUI_VERSION_MAJOR}.${SplineGUI_VERSION_MINOR})
 
 ADD_EXECUTABLE(SplineGUIApp src/main.cpp)
 TARGET_LINK_LIBRARIES(SplineGUIApp SplineGUI ${DEPLIBS})
@@ -99,5 +115,6 @@ ELSE(WIN32)
   FILE(GLOB_RECURSE LOCAL_CMAKE_MODULES cmake/Modules/*.cmake)
 
   # cmake modules
-  INSTALL(FILES ${LOCAL_CMAKE_MODULES} DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/Modules)
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/SplineGUIConfig.cmake
+    DESTINATION lib/SplineGUI COMPONENT liblrspline-dev)
 ENDIF(WIN32)

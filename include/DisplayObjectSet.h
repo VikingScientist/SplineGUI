@@ -61,9 +61,9 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		int objectAtPosition(int x, int y);
 		int objectAtPosition(int x, int y, int width, int height);
 
-		std::vector<DisplayObject*> objects;
-		std::set<DisplayObject*> selected;
-		std::vector<DisplayObject*> hidden;
+		std::vector<DisplayObject*>  objects;
+		std::set<DisplayObject*>     selected;
+		std::vector<DisplayObject*>  hidden;
 		DISPLAY_CLASS_TYPE classType;
 		int default_resolution[3];
 		bool no_control_mesh;

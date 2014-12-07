@@ -17,30 +17,30 @@ class VolumeDisplay : public DisplayObject {
 		Go::SplineVolume *volume;
 
 		VolumeDisplay(Go::SplineVolume *volume);
-		~VolumeDisplay();
-		void tesselate(int *n=NULL);
-		void paint();
-		void paintSelected();
-		void paintMouseAreas();
-		void readMouseAreas();
-		bool isAtPosition(int x, int y);
-		SurfaceDisplay* getSurfaceAt(int x, int y);
-		void processMouse(int button, int state, int x, int y);
-		void processMouseActiveMotion(int x, int y);
-		void processMousePassiveMotion(int x, int y);
-		DISPLAY_CLASS_TYPE classType() { return VOLUME; }
-		void printDebugInfo();
-		void print(std::ostream *out);
-		void setDrawControlMesh(bool draw); void setColorByParameterValues(bool draw);
-		void setSelectedColor(double r, double g, double b);
-		void setColor(double r, double g, double b);
-		void getBoundingBox(Go::BoundingBox &box) const ;
+		virtual ~VolumeDisplay();
+		virtual void tesselate(int *n=NULL);
+		virtual void paint();
+		virtual void paintSelected();
+		virtual void paintMouseAreas();
+		virtual void readMouseAreas();
+		virtual bool isAtPosition(int x, int y);
+		virtual SurfaceDisplay* getSurfaceAt(int x, int y);
+		virtual void processMouse(int button, int state, int x, int y);
+		virtual void processMouseActiveMotion(int x, int y);
+		virtual void processMousePassiveMotion(int x, int y);
+		virtual DISPLAY_CLASS_TYPE classType() { return VOLUME; }
+		virtual void printDebugInfo();
+		virtual void print(std::ostream *out);
+		virtual void setDrawControlMesh(bool draw); void setColorByParameterValues(bool draw);
+		virtual void setSelectedColor(double r, double g, double b);
+		virtual void setColor(double r, double g, double b);
+		virtual void getBoundingBox(Go::BoundingBox &box) const ;
 
-		void initMouseMasks() ;
-		void setMaskPos(int x, int y, bool value) ;
-		void paintMouseAreas(float r, float g, float b) ;
+		virtual void initMouseMasks() ;
+		virtual void setMaskPos(int x, int y, bool value) ;
+		virtual void paintMouseAreas(float r, float g, float b) ;
 	
-	private:
+	protected:
 
 		bool draw_contol_mesh;
 		bool colorByParametervalues;

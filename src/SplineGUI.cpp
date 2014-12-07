@@ -61,6 +61,7 @@ int last_mouse_y;
 struct timeval last_mouse_move;
 int hover_threadshold = 1000; // in milliseconds
 bool does_hover       = false;
+bool doIgnoreRemaskEvents = false;
 
 
 Camera cam(480, 480, 200, 200);
@@ -102,7 +103,7 @@ void removeKeyboardClassListener(KeyListener* kl) {
 
 
 void actionListener(ActiveObject *caller, int event) {
-	if(event & ACTION_REQUEST_REMASK)
+	if(event & ACTION_REQUEST_REMASK && !doIgnoreRemaskEvents)
 		updateMouseMasks();
 	if(event & ACTION_REQUEST_REPAINT)
 		glutPostRedisplay();
@@ -426,6 +427,7 @@ SplineGUI::SplineGUI() {
 	next_button_x = 10;
 	next_button_y = 20;
 	controlKeysEnabled = true;
+	doIgnoreRemaskEvents = false;
 
 	// initalize GLUT
 	int argc = 0;
@@ -622,6 +624,11 @@ void SplineGUI::computeBoundingBox() {
 	left_view.viewBoundingBox(box);
 }
 
+//! \brief true if GUI should surpress (costly) remask events used to detect object selections.
+//!        Remask may still be applied by manually calling updateMouseMasks() when needed
+void SplineGUI::ignoreRemaskEvents(bool ignore) {
+	doIgnoreRemaskEvents = ignore;
+}
 
 //! \brief true if GUI should interpet special key-characters (c,q,space etc) as view control
 //!        false if these are to be ignored (i.e. only passed to key listeners)

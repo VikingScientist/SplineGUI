@@ -1,0 +1,16 @@
+/*
+ * LRSpline_version.h
+ *
+ *  Created on: Aug 23, 2012
+ *      Author: akva
+ */
+
+#ifndef SPLINEGUI_VERSION_H_
+#define SPLINEGUI_VERSION_H_
+
+
+#define SPLINEGUI_VERSION_MAJOR @SplineGUI_VERSION_MAJOR@
+#define SPLINEGUI_VERSION_MINOR @SplineGUI_VERSION_MINOR@
+#define SPLINEGUI_VERSION_PATCH @SplineGUI_VERSION_PATCH@
+
+#endif

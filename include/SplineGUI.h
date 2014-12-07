@@ -96,6 +96,7 @@ class SplineGUI {
 		void removeTextField(TextField *tf);
 		void addKeyboardListener(void (*handleKeyPress)(unsigned char));
 		void enableControlKeys(bool controlKeysEnabled);
+		void ignoreRemaskEvents(bool ignore);
 		bool isControlKeysEnabled() ;
 
 		// window handling

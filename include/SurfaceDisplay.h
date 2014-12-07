@@ -15,33 +15,33 @@ class SurfaceDisplay : public DisplayObject {
 		Go::SplineSurface *surf;
 
 		SurfaceDisplay(Go::SplineSurface *surf, bool clean=false) ;
-		~SurfaceDisplay();
-		void setFaceIndex(int i);
-		void tesselate(int *n=NULL);
-		void paint();
-		void paintSelected();
-		void paintMouseAreas();
-		void readMouseAreas();
-		void paintMouseAreas(float r, float g, float b);
-		bool isAtPosition(int x, int y);
-		double* parValueAtPosition(int x, int y);
-		void processMouse(int button, int state, int x, int y);
-		void processMouseActiveMotion(int x, int y);
-		void processMousePassiveMotion(int x, int y);
-		DISPLAY_CLASS_TYPE classType() { return SURFACE; }
-		void printDebugInfo();
-		void print(std::ostream *out);
-		void setDrawControlMesh(bool draw);
-		void setDrawMeshlines(bool draw) ;
-		void setColorByParameterValues(bool draw);
+		virtual ~SurfaceDisplay();
+		virtual void setFaceIndex(int i);
+		virtual void tesselate(int *n=NULL);
+		virtual void paint();
+		virtual void paintSelected();
+		virtual void paintMouseAreas();
+		virtual void readMouseAreas();
+		virtual void paintMouseAreas(float r, float g, float b);
+		virtual bool isAtPosition(int x, int y);
+		virtual double* parValueAtPosition(int x, int y);
+		virtual void processMouse(int button, int state, int x, int y);
+		virtual void processMouseActiveMotion(int x, int y);
+		virtual void processMousePassiveMotion(int x, int y);
+		virtual DISPLAY_CLASS_TYPE classType() { return SURFACE; }
+		virtual void printDebugInfo();
+		virtual void print(std::ostream *out);
+		virtual void setDrawControlMesh(bool draw);
+		virtual void setDrawMeshlines(bool draw) ;
+		virtual void setColorByParameterValues(bool draw);
 
-		void initMouseMasks() ;
-		void setMaskPos(int x, int y, bool value) ;
+		virtual void initMouseMasks() ;
+		virtual void setMaskPos(int x, int y, bool value) ;
 
-		void getBoundingBox(Go::BoundingBox &box) const ;
+		virtual void getBoundingBox(Go::BoundingBox &box) const ;
 			
 	
-	private:
+	protected:
 
 		bool draw_contol_mesh;
 		bool draw_meshlines;
