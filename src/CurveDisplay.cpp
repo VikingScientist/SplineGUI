@@ -7,7 +7,7 @@
 //! \author Kjetil A. Johannessen / SINTEF
 //!
 //! \brief Display wrapper for Spline Curves
-//! 
+//!
 //==============================================================================
 
 #include "CurveDisplay.h"
@@ -30,6 +30,7 @@ CurveDisplay::CurveDisplay(SplineCurve *curve, bool clean) {
 	positions     = NULL;
 	param_values  = NULL;
 	xi_buffer     = NULL;
+	color_buffer  = NULL;
 	resolution    = 0;
 	selected      = false;
 	dim           = curve->dimension();
@@ -52,6 +53,7 @@ CurveDisplay::~CurveDisplay() {
 	if(positions)    delete[] positions;
 	if(param_values) delete[] param_values;
 	if(xi_buffer)    delete[] xi_buffer;
+	if(color_buffer) delete[] color_buffer;
 	delete curve;
 }
 
@@ -193,6 +195,7 @@ void CurveDisplay::tesselate(int *n) {
 	resolution = n[0];
 	positions    = new double[n[0]*dim];
 	param_values = new double[n[0]*3];
+	color_buffer = new double[n[0]*3];
 	int k=0;
 	for(int i=0; i<resolution; i++) {
 		for(int d=0; d<pts[i].dimension(); d++) {
@@ -201,6 +204,9 @@ void CurveDisplay::tesselate(int *n) {
 		param_values[i*3  ] = (param[i]-p_min)/(p_max-p_min);
 		param_values[i*3+1] = 0;
 		param_values[i*3+2] = 0;
+		color_buffer[i*3  ] = param_values[i*3] * selected_color[0];
+		color_buffer[i*3+1] = param_values[i*3] * selected_color[1];
+		color_buffer[i*3+2] = param_values[i*3] * selected_color[2];
 	}
 	if(start_p) start_p->tesselate(&resolution);
 	if(stop_p) stop_p->tesselate(&resolution);
@@ -218,10 +224,13 @@ void CurveDisplay::paint() {
 
 //! \brief draw the curve if it is selected by the user (brighter colors)
 void CurveDisplay::paintSelected() {
-	glColor3f(selected_color[0], selected_color[1], selected_color[2]);
+	// glColor3f(selected_color[0], selected_color[1], selected_color[2]);
 	glLineWidth(line_width);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(3, GL_DOUBLE, 0, color_buffer);
 	glVertexPointer(dim, GL_DOUBLE, 0, positions);
 	glDrawArrays(GL_LINE_STRIP, 0, resolution);
+	glDisableClientState(GL_COLOR_ARRAY);
 	if(start_p) start_p->paintSelected();
 	if(stop_p)  stop_p->paintSelected();
 }

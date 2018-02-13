@@ -52,6 +52,7 @@ class CurveDisplay : public DisplayObject {
 		int dim;
 		double *positions;
 		double *param_values;
+		double *color_buffer;
 		GLfloat *xi_buffer;
 		bool selected;
 		PointDisplay *start_p;
