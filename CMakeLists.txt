@@ -24,14 +24,14 @@ FIND_PACKAGE(GoTools REQUIRED)
 FIND_PACKAGE(GoTrivariate REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT REQUIRED)
-FIND_PACKAGE(GPM REQUIRED)
+#  FIND_PACKAGE(GPM REQUIRED)
 find_package(TinyXML REQUIRED)
 
 CONFIGURE_FILE(cmake/Templates/SplineGUIConfig.cmake.in
                SplineGUIConfig.cmake @ONLY)
 
 # Required libraries
-SET(DEPLIBS ${GPM_LIBRARIES} ${GoTrivariate_LIBRARIES}
+SET(DEPLIBS ${GoTrivariate_LIBRARIES}
             ${GoTools_LIBRARIES} ${GLUT_glut_LIBRARY}
             ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY}
             ${TINYXML_LIBRARIES}
@@ -88,14 +88,14 @@ SET_TARGET_PROPERTIES(SplineGUI PROPERTIES  VERSION ${SplineGUI_VERSION}
 ADD_EXECUTABLE(SplineGUIApp src/main.cpp)
 TARGET_LINK_LIBRARIES(SplineGUIApp SplineGUI ${DEPLIBS})
 
-ADD_EXECUTABLE(bndryCodeGUI src/main_setBndryCodes.cpp)
-TARGET_LINK_LIBRARIES(bndryCodeGUI SplineGUI ${DEPLIBS})
-
-ADD_EXECUTABLE(refineGUI src/main_refine_gui.cpp)
-TARGET_LINK_LIBRARIES(refineGUI SplineGUI ${DEPLIBS})
-
-ADD_EXECUTABLE(fenrisGUI src/main_gui.cpp)
-TARGET_LINK_LIBRARIES(fenrisGUI SplineGUI ${DEPLIBS})
+# ADD_EXECUTABLE(bndryCodeGUI src/main_setBndryCodes.cpp)
+# TARGET_LINK_LIBRARIES(bndryCodeGUI SplineGUI ${DEPLIBS})
+# 
+# ADD_EXECUTABLE(refineGUI src/main_refine_gui.cpp)
+# TARGET_LINK_LIBRARIES(refineGUI SplineGUI ${DEPLIBS})
+# 
+# ADD_EXECUTABLE(fenrisGUI src/main_gui.cpp)
+# TARGET_LINK_LIBRARIES(fenrisGUI SplineGUI ${DEPLIBS})
 
 # 'install' target
 IF(WIN32)
@@ -105,7 +105,7 @@ ELSE(WIN32)
   INSTALL(TARGETS SplineGUI DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
   # binaries
-  INSTALL(TARGETS SplineGUIApp bndryCodeGUI DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+  INSTALL(TARGETS SplineGUIApp DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
   # headers
   FILE(GLOB_RECURSE SplineGUI_HEADERS include/*.h)
