@@ -25,7 +25,7 @@ FIND_PACKAGE(GoTrivariate REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT REQUIRED)
 #  FIND_PACKAGE(GPM REQUIRED)
-find_package(TinyXML REQUIRED)
+# find_package(TinyXML REQUIRED)
 
 CONFIGURE_FILE(cmake/Templates/SplineGUIConfig.cmake.in
                SplineGUIConfig.cmake @ONLY)
@@ -34,7 +34,6 @@ CONFIGURE_FILE(cmake/Templates/SplineGUIConfig.cmake.in
 SET(DEPLIBS ${GoTrivariate_LIBRARIES}
             ${GoTools_LIBRARIES} ${GLUT_glut_LIBRARY}
             ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY}
-            ${TINYXML_LIBRARIES}
 )
 
 # Required include directories
