@@ -34,6 +34,7 @@ class SurfaceDisplay : public DisplayObject {
 		virtual void setDrawControlMesh(bool draw);
 		virtual void setDrawMeshlines(bool draw) ;
 		virtual void setColorByParameterValues(bool draw);
+		virtual void setTextured(bool draw);
 
 		virtual void initMouseMasks() ;
 		virtual void setMaskPos(int x, int y, bool value) ;
@@ -46,6 +47,7 @@ class SurfaceDisplay : public DisplayObject {
 		bool draw_contol_mesh;
 		bool draw_meshlines;
 		bool colorByParametervalues;
+		bool textured;
 		int resolution[2];
 		int triangle_count;
 		int width;

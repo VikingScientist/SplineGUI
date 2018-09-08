@@ -22,6 +22,7 @@ SurfaceDisplay::SurfaceDisplay(SplineSurface *surf, bool clean) : DisplayObject(
 	draw_contol_mesh       = false;
 	draw_meshlines         = true;
 	colorByParametervalues = false;
+	textured               = false;
 	faceIndex              = -1;
 	dim                    = surf->dimension();
 	setColor(.8, .4, .05); // orange
@@ -232,13 +233,27 @@ void SurfaceDisplay::paint() {
 	} else {
 		glEnable(GL_LIGHTING);
 		glEnableClientState(GL_NORMAL_ARRAY);
-		glColor3f(color[0], color[1], color[2]);
+		if(textured) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 1);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glEnable(GL_TEXTURE_2D);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(2, GL_DOUBLE, sizeof(double)*3, param_values);
+		} else {
+			glColor3f(color[0], color[1], color[2]);
+		}
 		glVertexPointer(dim, GL_DOUBLE, 0, positions);
 		glNormalPointer(GL_DOUBLE, 0, normals);
 		glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisable(GL_LIGHTING);
-	
+		if(textured) {
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDisable(GL_TEXTURE_2D);
+		}
+
 		if(draw_meshlines)
 			for(uint i=0; i<knot_lines.size(); i++)
 				knot_lines[i]->paint();
@@ -258,8 +273,9 @@ void SurfaceDisplay::paintSelected() {
 	glDrawElements(GL_TRIANGLE_STRIP, triangle_count, GL_UNSIGNED_INT, triangle_strip);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisable(GL_LIGHTING);
-	if(colorByParametervalues)
+	if(colorByParametervalues) {
 		glDisableClientState(GL_COLOR_ARRAY);
+	}
 
 	if(draw_meshlines)
 		for(uint i=0; i<knot_lines.size(); i++)
@@ -310,6 +326,10 @@ void SurfaceDisplay::setDrawMeshlines(bool draw) {
 
 void SurfaceDisplay::setColorByParameterValues(bool draw) {
 	colorByParametervalues = draw;
+}
+
+void SurfaceDisplay::setTextured(bool draw) {
+	textured = draw;
 }
 
 
