@@ -139,7 +139,7 @@ void drawScene() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glDisable(GL_DEPTH_TEST);
-	
+
 	objectSet.paintSelectionBox();
 	for(vector<Button*>::size_type i=0; i<buttons.size(); i++)
 		buttons[i]->paint();

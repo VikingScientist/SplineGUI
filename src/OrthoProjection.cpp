@@ -200,6 +200,7 @@ void OrthoProjection::handleResize(int x, int y, int w, int h)  {
 
 void OrthoProjection::paintBackground() {
 	glClearColor(.5, .5, .5, 0);
+	glColor3f(1., 1., 1.);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

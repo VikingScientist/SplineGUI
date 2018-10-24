@@ -215,7 +215,7 @@ void SurfaceDisplay::tesselate(int *n) {
 			cp_lines[c++] = (j+1)*nCoef[0] + i;
 		}
 	}
-	
+
 	// tesselate all knot lines owned by this surface
 	for(uint i=0; i<knot_lines.size(); i++)
 		knot_lines[i]->tesselate();
