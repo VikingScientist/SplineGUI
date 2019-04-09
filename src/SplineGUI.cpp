@@ -543,6 +543,10 @@ vector<DisplayObject*> SplineGUI::getSelectedObjects() {
 	return objectSet.getSelectedObjects();
 }
 
+void SplineGUI::hideObjects(DisplayObject* obj) {
+	objectSet.hideObjects(obj);
+}
+
 void SplineGUI::hideObjects(DISPLAY_CLASS_TYPE type) {
 	objectSet.hideObjects(type);
 }

@@ -28,6 +28,7 @@ class DisplayObjectSet : public MouseListener, ActiveObject {
 		bool removeObject(DisplayObject* obj);
 		void removeSelected();
 		void hideObjects(DISPLAY_CLASS_TYPE type);
+		void hideObjects(DisplayObject* obj);
 		void unHideObjects(DISPLAY_CLASS_TYPE type);
 		void processMouse(int button, int state, int x, int y);
 		void processMouseActiveMotion(int x, int y);

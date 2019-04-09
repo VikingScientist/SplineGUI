@@ -223,6 +223,20 @@ void DisplayObjectSet::removeSelected() {
 /** \todo make it possible that items appear in BOTH the hidden vector and the objects vector
           in the same way that the selected vector works */
 
+void DisplayObjectSet::hideObjects(DisplayObject* obj) {
+	hidden.push_back(obj);
+	set<DisplayObject*>::iterator sel_it = selected.find(obj);
+	if(sel_it != selected.end())
+		selected.erase(sel_it);
+	for(vector<DisplayObject*>::iterator o=objects.begin(); o < objects.end(); ++o) {
+		if(*o == obj) {
+			objects.erase(o);
+			break;
+		}
+	}
+	fireActionEvent(ACTION_REQUEST_REPAINT | ACTION_REQUEST_REMASK);
+}
+
 void DisplayObjectSet::hideObjects(DISPLAY_CLASS_TYPE type) {
 	for(vector<DisplayObject*>::iterator obj=objects.begin(); obj < objects.end(); ++obj) {
 		if((*obj)->classType() == type || type==ALL) {

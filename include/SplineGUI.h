@@ -86,6 +86,7 @@ class SplineGUI {
 		CurveDisplay* getDisplayObject(Go::SplineCurve *c);
 		SurfaceDisplay* getDisplayObject(Go::SplineSurface *s);
 		VolumeDisplay* getDisplayObject(Go::SplineVolume *v);
+		void hideObjects(DisplayObject* obj);
 		void hideObjects(DISPLAY_CLASS_TYPE type);
 		void unHideObjects(DISPLAY_CLASS_TYPE type);
 		std::vector<DisplayObject*> getSelectedObjects();

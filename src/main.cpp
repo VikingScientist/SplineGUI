@@ -6,14 +6,16 @@
  *
  * \brief Program for displaying GoTools native file(s) through the simplest use of SplineGUI
  *************************************************************************************/
- 
+
 #include "SplineGUI.h"
 #include "DisplayObjectSet.h"
 #include "Button.h"
 #include <string.h>
 #include <iostream>
+#include <vector>
 
 typedef std::vector<DisplayObject*>::iterator objIterator;
+SplineGUI *gui;
 
 bool isInt(char* str) {
 	while(*str != 0) {
@@ -24,6 +26,18 @@ bool isInt(char* str) {
 	return true;
 }
 
+void keyClick(unsigned char key) {
+	if(key == 13) { // enter key
+		std::vector<DisplayObject*> selected = gui->getSelectedObjects();
+		for(DisplayObject* obj : selected)
+			gui->hideObjects(obj);
+	} else if(key == 27) { // esc key
+		gui->unHideObjects(VOLUME);
+		gui->unHideObjects(SURFACE);
+	}
+}
+
+
 
 using namespace std;
 
@@ -31,7 +45,7 @@ int main(int argc, char** argv) {
 	vector<int> customTesselation;
 	bool hideline = false;
 
-	SplineGUI *gui = SplineGUI::getInstance();
+	gui = SplineGUI::getInstance();
 	for(int argi=1; argi<argc; argi++) {
 		if(argv[argi][0]=='-') {
 			if(!strcmp(argv[argi]+1, "help")) {
@@ -64,17 +78,20 @@ int main(int argc, char** argv) {
 	// but we'll add some usability by adding parametric coloring
 	DisplayObjectSet* objSet = gui->getObjectSet();
 	objSet->colorSelectedByParameterValues(true);
-	
+
 	if(customTesselation.size() > 0) {
 		while(customTesselation.size()<3)
 			customTesselation.push_back(customTesselation.back());
-		
+
 		objSet->tesselateAll(&(customTesselation[0]));
 	}
 	if(hideline)
 		for(objIterator obj=objSet->objects_begin(); obj != objSet->objects_end(); obj++)
 			if((*obj)->classType() == SURFACE)
 				((SurfaceDisplay*) *obj)->setDrawMeshlines(false);
+
+    // listen for 'enter' inputs to hide selected volumes
+	gui->addKeyboardListener(keyClick);
 
 	gui->show();
 
