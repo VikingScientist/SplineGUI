@@ -20,4 +20,11 @@ The controls of the GUI are as follows
 
 ## Library requirements
 
-The project relies on the use of openGL, and specifically the openGL Utility Toolkit (GLUT) for the visualisation. These libraries must be installed on the local computer. It is also dependent on the following GoTools libraries: Trivariate and Core.
+The project relies on the use of OpenGL, and specifically the OpenGL Utility Toolkit (GLUT) for the visualisation.
+These libraries must be installed on the local computer, e.g., on Ubuntu the following will do:
+
+    sudo apt install freeglut3-dev libopengl-dev
+
+It is also dependent on the GoTools libraries Trivariate and Core, e.g.,
+
+    sudo apt install libgotools-core-dev libgotools-trivariate-dev
